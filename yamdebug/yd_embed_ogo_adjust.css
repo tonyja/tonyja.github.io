@@ -1,0 +1,42 @@
+/* Most importantly, hide the large icon for OGOs in the yammer embed feed */
+.yj-embed .yj-attachments .yj-open-graph-object .yj-thumbnail
+{
+  display: none;
+}
+
+/* Next remove the margin that wraps around the thumbnails for OGOs in the yammer embed feed */
+.yj-embed .yj-attachments .yj-open-graph-object .yj-description,
+.yj-embed .yj-attachments .yj-open-graph-object .yj-subtitle,
+.yj-embed .yj-attachments .yj-open-graph-object .yj-title
+{
+  margin-left: 0px;
+}
+
+/* If you need to clean it up even more then hide the subtitle and description for OGOs in the yammer embed feed */
+/* .yj-embed .yj-attachments .yj-open-graph-object .yj-title, */
+.yj-embed .yj-attachments .yj-open-graph-object .yj-description,
+.yj-embed .yj-attachments .yj-open-graph-object .yj-subtitle
+{
+  display: none;
+}
+
+
+/* If you want to display nothing at all for OGOs in the feed then just uncomment the disaplay: none for the whole OGO below */
+.yj-embed .yj-attachments .yj-open-graph-object
+{
+  /* display: none; */
+}
+
+
+.yj-global-od4b-file-select-button .yamicon-microsoft
+{
+    width: 17px;
+    height: 15px;
+    background-image: url('https://www.yammer.com/api/v1/uploaded_files/21977981/preview/SmallBlueCloudIcon.jpg?20x20');
+    display: inline-block;
+}
+
+.yj-global-od4b-file-select-button  .yamicon-microsoft:before
+{
+    content: " ";
+}

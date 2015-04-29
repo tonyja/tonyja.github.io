@@ -1,0 +1,151 @@
+# initially copied from yamjs here:
+# https://github.int.yammer.com/yammer/yamjs/blob/622cf4e54d340e99aa1f2ba0da279afda04943fc/.gitignore
+# ------------------------------------------------------------------------------
+# YAMJS SPECIFIC STUFF
+# ------------------------------------------------------------------------------
+
+/.grunt/
+/coverage/
+/plato-reports/
+/dist/
+/node_modules/
+/.jshintrc
+/_SpecRunner.html
+/development.js
+/sauce_connect.log*
+/yamjs_upstart.log
+/spec/browser/autogen_suite.js
+/required_specs.js
+/required_specs.css
+/grunt_options.json
+
+# ------------------------------------------------------------------------------
+# LINUX
+# ------------------------------------------------------------------------------
+
+.*
+!.gitignore
+*~
+
+# ------------------------------------------------------------------------------
+# MAC OS X
+# ------------------------------------------------------------------------------
+
+# Finder attributes.
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+# Thumbnails.
+._*
+# Files and folders used on removable drives.
+.fseventsd
+.metadata_never_index
+.Spotlight-V100
+.Trashes
+
+# ------------------------------------------------------------------------------
+# WINDOWS
+# ------------------------------------------------------------------------------
+
+# Image file caches.
+Thumbs.db
+ehthumbs.db
+# Folder config file.
+Desktop.ini
+# Recycle bin used on file shares.
+$RECYCLE.BIN/
+
+# ------------------------------------------------------------------------------
+# EMACS
+# ------------------------------------------------------------------------------
+
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+.elc
+auto-save-list
+tramp
+.\#*
+# Org mode.
+.org-id-locations
+*_archive
+
+# ------------------------------------------------------------------------------
+# VIM
+# ------------------------------------------------------------------------------
+
+*.s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
+
+# ------------------------------------------------------------------------------
+# TAGS
+# ------------------------------------------------------------------------------
+
+TAGS
+!TAGS/
+tags
+!tags/
+
+# ------------------------------------------------------------------------------
+# SUBLIMETEXT
+# ------------------------------------------------------------------------------
+
+/*.sublime-project
+*.sublime-workspace
+
+# ------------------------------------------------------------------------------
+# TEXTMATE
+# ------------------------------------------------------------------------------
+
+*.tmproj
+*.tmproject
+tmtags
+
+# ------------------------------------------------------------------------------
+# ECLIPSE
+# ------------------------------------------------------------------------------
+
+.classpath
+.loadpath
+.metadata
+.project
+.settings
+local.properties
+*.bak
+*.tmp
+*.pydevproject
+*~.nib
+# External tool builders
+.externalToolBuilders/
+# Locally stored "Eclipse launch configurations"
+*.launch
+# CDT-specific
+.cproject
+# PDT-specific
+.buildpath
+
+# ------------------------------------------------------------------------------
+# INTELLIJ
+# ------------------------------------------------------------------------------
+
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# ------------------------------------------------------------------------------
+# NETBEANS
+# ------------------------------------------------------------------------------
+
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+nbactions.xml
+nb-configuration.xml

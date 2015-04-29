@@ -1,0 +1,142 @@
+/* work_discovery_seen_unseen
+   -------------------------------------------------- */
+
+.wd-seen-unseen .yj-thread-reply-list-item,
+.wd-seen-unseen .yj-thread-list-item .yj-thread-reply-container,
+.wd-seen-unseen .yj-thread-list-item .yj-global-reply-publisher-with-avatar,
+.wd-seen-unseen .yj-thread-list-item .yj-thread-replies-container .yj-show-older-replies,
+.wd-seen-unseen .yj-thread-list-item .yj-thread-replies-container .yj-show-newer-replies,
+.wd-seen-unseen .yj-thread-replies-container .yj-thread-topics,
+.wd-seen-unseen .yj-tag-list .yj-tag,
+.wd-seen-unseen .yj-thread-list-item .yj-liked-by {
+  background: transparent;
+}
+
+.wd-seen-unseen .yj-thread-list-item.yj-thread-list-item {
+  background: #fcfcfc;
+}
+.wd-seen-unseen .yj-thread-list-item.yj-thread-list-item.yj-thread-unseen,
+.wd-seen-unseen .yj-thread-list-item.yj-thread-list-item.yj-thread-unviewed {
+  background: #fff;
+}
+
+.wd-seen-unseen .yj-thread-list-item {
+  -webkit-transition: border-color 0.4s linear 0.4s, background-color 0.4s linear 0.4s;
+  -moz-transition:    border-color 0.4s linear 0.4s, background-color 0.4s linear 0.4s;
+  transition:         border-color 0.4s linear 0.4s, background-color 0.4s linear 0.4s;
+}
+.wd-seen-unseen .yj-thread-list-item:before {
+  -webkit-transition: opacity 0.4s linear 0.4s;
+  -moz-transition:    opacity 0.4s linear 0.4s;
+  transition:         opacity 0.4s linear 0.4s;
+}
+
+/*
+.wd-seen-unseen .yj-thread-list-item.yj-thread-unseen,
+.wd-seen-unseen .yj-thread-list-item.yj-thread-unviewed {
+  border-color: #0072c6;
+}
+*/
+.wd-seen-unseen .yj-thread-list-item:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: -1px;
+  border: 2px solid #0072c6;
+  opacity: 0;
+  pointer-events: none;
+}
+.wd-seen-unseen .yj-thread-list-item.yj-thread-unseen:before,
+.wd-seen-unseen .yj-thread-list-item.yj-thread-unviewed:before {
+  opacity: 1;
+}
+
+
+// Mario's right side red lines
+.yj-thread-list-item:after {
+    -webkit-transition: background-color 0.2s linear;
+    bottom: 0;
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 5px;
+}
+ 
+.yj-thread-new-activity:after {
+    background: rgba(255,0,0,0.3);
+}
+ 
+.yj-thread-unviewed:after {
+    background: rgba(255,0,0,1) ;
+}
+
+// This fixes avocado label blocking the results link
+.template-settings .form-inline label {
+  margin-right: -25px;
+}
+
+.template-settings .form-inline label {
+  margin-right: -15px;
+}
+
+/* Manually add yj-highlight overrides */
+/* Align the left nav with the user's avatar
+   so that the selected item's left border is outside
+   this alignment */
+.nav-list .all-company-list-item:hover,
+.nav-list .all-company-list-item.yj-selected,
+.nav-list .all-company-list-item.yj-highlight,
+.nav-list .nav-group-link.yj-highlight,
+.nav-list .nav-group-link:hover,
+.nav-list .nav-group-link.yj-selected {
+  border-left: 4px solid #0072c6;
+  margin-left: -8px;
+}
+.yj-nav-menu .nav-group-link .nav-list-link,
+.yj-nav-menu .all-company-list-item .nav-list-link {
+  padding: 8px 2px 8px 6px;
+}
+.nav-list .all-company-list-item:hover .nav-list-link,
+.nav-list .all-company-list-item.yj-selected .nav-list-link,
+.nav-list .all-company-list-item.yj-highlight .nav-list-link,
+.nav-list .nav-group-link.yj-highlight .nav-list-link,
+.nav-list .nav-group-link:hover .nav-list-link,
+.nav-list .nav-group-link.yj-selected .nav-list-link {
+  padding-left: 10px;
+}
+.yj-nav-menu .nav-list-link {
+  font-size: 14px;
+  font-size: 1.4rem;
+  position: relative;
+  display: block;
+  padding: 7px 2px 7px 29px;
+  overflow: hidden;
+}
+.yj-nav-menu .groups-dir-link {
+  padding-top: 10px;
+}
+.yj-nav-menu .nav-list-link:hover {
+  background: #efefef;
+  text-decoration: none;
+}
+.yj-nav-menu .uni-current-network .nav-list-link,
+.yj-nav-menu .yj-selected .nav-list-link {
+  font-weight: bold;
+  color: #0072c6; /* var(--cards-color-primary) */
+}
+.yj-nav-menu .yj-highlight .nav-list-link {
+  /*font-weight: bold; do not use bold on mouseover for CTA since it looks unpleasant*/
+  color: #0072c6; /* var(--cards-color-primary) */
+}
+.yj-nav-menu .yj-selected .nav-list-link:hover {
+  background-color: #efefef;
+}
+
+.yj-nav-menu .yj-highlight {
+  background-color: #e5f1f9; /* var(--blue-light-carolina); */
+}
+

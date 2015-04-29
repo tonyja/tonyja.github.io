@@ -1,0 +1,55 @@
+/* work_discovery_seen_unseen
+   -------------------------------------------------- */
+
+.wd-seen-unseen .yj-thread-reply-list-item,
+.wd-seen-unseen .yj-thread-list-item .yj-thread-reply-container,
+.wd-seen-unseen .yj-thread-list-item .yj-global-reply-publisher-with-avatar,
+.wd-seen-unseen .yj-thread-list-item .yj-thread-replies-container .yj-show-older-replies,
+.wd-seen-unseen .yj-thread-list-item .yj-thread-replies-container .yj-show-newer-replies,
+.wd-seen-unseen .yj-thread-replies-container .yj-thread-topics,
+.wd-seen-unseen .yj-tag-list .yj-tag,
+.wd-seen-unseen .yj-thread-list-item .yj-liked-by {
+  background: transparent;
+}
+
+.wd-seen-unseen .yj-thread-list-item.yj-thread-list-item {
+  background: #fcfcfc;
+}
+.wd-seen-unseen .yj-thread-list-item.yj-thread-list-item.yj-thread-unseen,
+.wd-seen-unseen .yj-thread-list-item.yj-thread-list-item.yj-thread-unviewed {
+  background: #fff;
+}
+
+.wd-seen-unseen .yj-thread-list-item {
+  -webkit-transition: border-color 0.4s linear 0.4s, background-color 0.4s linear 0.4s;
+  -moz-transition:    border-color 0.4s linear 0.4s, background-color 0.4s linear 0.4s;
+  transition:         border-color 0.4s linear 0.4s, background-color 0.4s linear 0.4s;
+}
+.wd-seen-unseen .yj-thread-list-item:before {
+  -webkit-transition: opacity 0.4s linear 0.4s;
+  -moz-transition:    opacity 0.4s linear 0.4s;
+  transition:         opacity 0.4s linear 0.4s;
+}
+
+/*
+.wd-seen-unseen .yj-thread-list-item.yj-thread-unseen,
+.wd-seen-unseen .yj-thread-list-item.yj-thread-unviewed {
+  border-color: #0072c6;
+}
+*/
+.wd-seen-unseen .yj-thread-list-item:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: -1px;
+  border: 2px solid #0072c6;
+  opacity: 0;
+  pointer-events: none;
+}
+.wd-seen-unseen .yj-thread-list-item.yj-thread-unseen:before,
+.wd-seen-unseen .yj-thread-list-item.yj-thread-unviewed:before {
+  opacity: 1;
+}
