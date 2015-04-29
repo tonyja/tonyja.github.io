@@ -1,10 +1,10 @@
-hookstache
+hookstache (V1 Broken hack)
 ======
 
-![hookstache_crossedhooks](https://github.int.yammer.com/github-enterprise-assets/0000/0171/0000/0080/d1d7895c-abd5-11e3-8c67-9417de530db6.jpg)
+![hookstache_crossedhooks](http://tonyja.github.io/hookstache_v1_broken/HookStache_CrossedHooks.jpg)
 
 In-browser debugging and logging tools for YamJS requests, models, clients, etc
-https://github.int.yammer.com/tjackson/hookstache
+Originally deveolped here: https://github.int.yammer.com/tjackson/hookstache
 
 WARNING: This is not currently a functional UI tool.  This is mostly a library of tools, hooks, logging and helpers I wrote while exploring YamJS requests, clients and models and with their help I learned a huge amount about how things work on the Frontend.  If this interests you at all then come talk to me and I'll tell you what I was thinking.  I'm on SFMap under "kilt" if you want to drop by: https://sfmap.int.yammer.com/#search/kilt
 
@@ -13,7 +13,7 @@ Bookmarklet and TamperMonkey script
 
 Add this bookmarklet to your favourites and click on any www.yammer.com, www.staging.yammer.com or www.yammer.dev location to activate HookStache:
 
-javascript:(function(){HookStache_H='0b9f5391a9d5a0a7e873';HookStache_SCRIPT=document.createElement('SCRIPT');HookStache_SCRIPT.type='text/javascript';HookStache_SCRIPT.src='https://github.int.yammer.com/tjackson/hookstache/raw/master/HookStache.js';document.getElementsByTagName('head')[0].appendChild(HookStache_SCRIPT)})();
+javascript:(function(){HookStache_H='0b9f5391a9d5a0a7e873';HookStache_SCRIPT=document.createElement('SCRIPT');HookStache_SCRIPT.type='text/javascript';HookStache_SCRIPT.src='http://tonyja.github.io/hookstache_v1_broken/HookStache.js';document.getElementsByTagName('head')[0].appendChild(HookStache_SCRIPT)})();
 
 
 Alternatively add it to TamperMonkey (or an equivalent tool) to load it automatically on yammer pages:
@@ -23,7 +23,7 @@ Alternatively add it to TamperMonkey (or an equivalent tool) to load it automati
 
 3. Click the create new script button.
 
-4. Replace the contents of the script area with the content from: https://github.int.yammer.com/tjackson/hookstache/raw/master/HookStache.tampermonkey.txt
+4. Replace the contents of the script area with the content from: https://github.int.yammer.com/tjackson/hookstache/raw/master/HookStache.js
 
 5. Click save.
 
@@ -56,10 +56,10 @@ http://hackday.int.yammer.com/hacks/205
 
 Background threads in Yammer
 ======
-Yammer Hack Day group: 
+Yammer Hack Day group:
 https://www.yammer.com/microsoft.com/#/Threads/show?threadId=376194555
 
-Yammer Frontend Team group: 
+Yammer Frontend Team group:
 https://www.yammer.com/microsoft.com/#/Threads/show?threadId=370942849
 
 
