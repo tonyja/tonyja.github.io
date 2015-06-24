@@ -20,6 +20,17 @@ Add a bookmark in chrome to the following script and click it at any time on Yam
 
 */
 
+yam.$ = yam.$ || window.jQuery;
+
+window.yam = _.extend(yam,
+    require("core/lib/session"),
+    require("core/lib/yammer_config"),
+    require("core/lib/treatment"),
+    require("core/lib/namespace")
+    );
+window.yam.uri = require("core/lib/uri_helper");
+
+
 console.trace("LOADING SeenUnseenTroubleshooter using tampermonkey. Call JSON.stringify(debugSeenUnseenInAllFeeds(), null, ' '); to debug");
 
 // Circular reference protected JSON.stringify found here: http://stackoverflow.com/a/17773553

@@ -21,30 +21,32 @@ function setYamConfigToDebug() {
         yam.ready(function() {
             yam.config({debug:true});
             console.log("yam.ready() call completed in setYamConfigToDebug",yam.config());
-            //yam.$(document.body).removeClass("wd-seen-unseen");
             var extendFunc = (_ || $ || {}).extend;
             if(!!extendFunc && !!require) {
-                window.ym = _.extend({},require("core/lib/session"),require("core/lib/yammer_config"),require("core/lib/treatment"));
-                unsafeWindow.ym = window.ym;
-                console.log("Added 'ym' object with global yam functions for debug",ym);
+                window.yd = _.extend({},
+                    require("core/lib/session"),
+                    require("core/lib/yammer_config"),
+                    require("core/lib/treatment"),
+                    require("core/lib/namespace")
+                    );
+                if(typeof(unsafeWindow) != "undefined") unsafeWindow.yd = window.yd;
+                console.log("Added 'yd' object with global yam functions for debug",yd);
             } else {
-                console.log("Could not add 'ym' debug object due to missing '($ || _).extend' or 'require' functions. extendFunc=",extendFunc,"requireFunc=",require);
+                console.log("Could not add 'yd' debug object due to missing '($ || _).extend' or 'require' functions. extendFunc=",extendFunc,"requireFunc=",require);
             }
-
-            //require("yam.$")('.yj-nav-fixed-content').addClass('yj-fixed-bottom');
         });
     }
     else if(setYamDebugRetriesLeft > 0)
     {
-        console.log("Delay and retry setYamConfigToDebug due to missing 'yam' object.  Attempts remaining=",setYamDebugRetriesLeft)
+        console.log("Delay and retry setYamConfigToDebug due to missing 'yam' object.  Attempts remaining=",setYamDebugRetriesLeft);
         setYamDebugRetriesLeft--;
         debugTimeout = setTimeout(setYamConfigToDebug, 100);
     }
-};
+}
 
 
 
-window.HookStacheLoad = (function(){HookStache_H='0b9f5391a9d5a0a7e873';HookStache_SCRIPT=document.createElement('SCRIPT');HookStache_SCRIPT.type='text/javascript';HookStache_SCRIPT.src='https://github.int.yammer.com/tjackson/hookstache/raw/master/HookStache.js';document.getElementsByTagName('head')[0].appendChild(HookStache_SCRIPT)});
+window.HookStacheLoad = (function(){HookStache_H='0b9f5391a9d5a0a7e873';HookStache_SCRIPT=document.createElement('SCRIPT');HookStache_SCRIPT.type='text/javascript';HookStache_SCRIPT.src='https://tonyja.github.io/hookstache_v1_broken/HookStache.js';document.getElementsByTagName('head')[0].appendChild(HookStache_SCRIPT)});
 
 if(typeof(unsafeWindow) != "undefined") unsafeWindow.HookStacheLoad = window.HookStacheLoad;
 
