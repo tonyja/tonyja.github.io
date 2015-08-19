@@ -180,7 +180,7 @@ function setYamConfigToDebug() {
                         feedUrl +
                          " state:" + this._lifecycleState +
                          " type:" + this._connectionType +
-                         " newest:" + this._newestId.threaded +
+                         " newest:" + yd.val(this,'_newestId.threaded') +
                          " hasOlder:"+this._hasOlderAvailable +
                       "]";
                 };
@@ -232,14 +232,22 @@ function setYamConfigToDebug() {
                             obj,
                             funcName,
                             function(){
+                                console.group();
+                                
                                 var argsString = _.map(arguments,function(arg){return ("function"=== typeof(arg)) ? "function(){...}" : (arg||"{empty}").toString();}).join(", ");
+                                var stackTrace = Error().stack;
+                                window.yd.stacktrack = window.yd.stacktrack||{};
+                                window.yd.stacktrack[stackTrace]= (window.yd.stacktrack[stackTrace]||0)+1;
                                 console.error("CALLING:",
                                               funcName,"(",argsString,") (proto=",objPath,")\n",
                                               "ON: ",(this||"{no 'this'}").toString(),
                                               "\nCall details: arguments=",arguments,"this=",this);
+                                
                                 //debugger;
                             },
                             function(){
+                                
+                                console.groupEnd();
                                 //console.error("AFTER reportFeedEvent:",arguments,this);
                                 //debugger;
                             },
