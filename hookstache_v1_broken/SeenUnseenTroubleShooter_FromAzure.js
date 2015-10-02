@@ -40,7 +40,7 @@ JSON.stringifyOnce = function(obj, replacer, indent){
       var printedObjectKeys = [];
 
       var printOnceReplacer = function(key, value){
-          if ( printedObjects.length > 2000){ // browsers will not print more than 20K, I don't see the point to allow 2K.. algorithm will not be fast anyway if we have too many objects
+          if ( printedObjects.length > 6000){ // browsers will not print more than 20K, I don't see the point to allow 2K.. algorithm will not be fast anyway if we have too many objects
             return 'object too long';
           }
           var printedObjIndex = false;
@@ -623,8 +623,9 @@ window.debugSeenUnseenInFeed = function(f, allFeedsMap) {
             selectedFeedModelSubProps);
     }, feedDiags, "__selected_feed_model_data");
 
-    var rtcOrUndefined = f.getClient();
-    var rtcStateKey = (!rtcOrUndefined || rtcOrUndefined.isStopped()) ?
+    var rtcOrUndefined = (f.getClient && f.getClient());
+    var feedIsConnected = (f.isRealtimeConnected && f.isRealtimeConnected());
+    var rtcStateKey = feedIsConnected ?
         "UnconnectedFeeds" :
         "ConnectedFeeds";
 
@@ -718,7 +719,7 @@ window.feedKeyForFeed = function(f) {
 
     //console.log(feedDiags.feedKey,feedDiags);
 
-    return feedKey;
+    return feedKeyV2; //feedKey;
 };
 
 window.debugSeenUnseenInAllFeeds = function() {
