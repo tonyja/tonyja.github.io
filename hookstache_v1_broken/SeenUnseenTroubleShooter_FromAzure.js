@@ -19,7 +19,7 @@ Add a bookmark in chrome to the following script and click it at any time on Yam
  javascript:(function(theWindow){theWindow.unsafeWindow={};yam.$.getScript(['http','s:/','/','unseen.azurewebsites.net','/','SeenUnseenTroubleShooter.js'].join(''),function(){triggerSeenUnseenDiagnostics(theWindow);});})(window)
 
 */
-
+(function (_) {
 yam.$ = yam.$ || window.jQuery;
 
 window.yam = _.extend(yam,
@@ -854,6 +854,7 @@ if(typeof(unsafeWindow) != "undefined") {
     unsafeWindow.seen_unseen_devdebug = false;
 }
 
+})(require('yam._'));
 
 // Note that only IDs, counts, and timestamps should be in the data so users can
 // trust that no auth tokens or message content are being leaked to the debug post
