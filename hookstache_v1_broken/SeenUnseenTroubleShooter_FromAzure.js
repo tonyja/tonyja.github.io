@@ -19,9 +19,9 @@ Add a bookmark in chrome to the following script and click it at any time on Yam
  javascript:(function(theWindow){theWindow.unsafeWindow={};yam.$.getScript(['http','s:/','/','unseen.azurewebsites.net','/','SeenUnseenTroubleShooter.js'].join(''),function(){triggerSeenUnseenDiagnostics(theWindow);});})(window)
 
 */
-(function (_) {
+(function (_,window) {
+var yam = window.yam;
 yam.$ = yam.$ || window.jQuery;
-
 window.yam = _.extend(yam,
     require("core/lib/session"),
     require("core/lib/yammer_config"),
@@ -29,7 +29,7 @@ window.yam = _.extend(yam,
     require("core/lib/namespace")
     );
 window.yam.uri = require("core/lib/uri_helper");
-
+window.yam.getCurrentUser = _.bind(window.yam.getCurrentUser,require("core/lib/session"));
 
 console.trace("LOADING SeenUnseenTroubleshooter using tampermonkey. Call JSON.stringify(debugSeenUnseenInAllFeeds(), null, ' '); to debug");
 
@@ -40,7 +40,7 @@ JSON.stringifyOnce = function(obj, replacer, indent){
       var printedObjectKeys = [];
 
       var printOnceReplacer = function(key, value){
-          if ( printedObjects.length > 6000){ // browsers will not print more than 20K, I don't see the point to allow 2K.. algorithm will not be fast anyway if we have too many objects
+          if ( printedObjects.length > 10000){ // Don't allow more than 100K. algorithm will not be fast anyway if we have too many objects
             return 'object too long';
           }
           var printedObjIndex = false;
@@ -186,9 +186,9 @@ window.doesFeedMatchCurrent = function(f, allFeedsMap) {
     var curUrlData = (allFeedsMap || {})._currentUrl;
 
     return (!!curUrlData &&
-        f.type == curUrlData.detected_feed_type &&
+        (f.getLogSource && f.getLogSource()) == curUrlData.detected_feed_type &&
         (!curUrlData.detected_feed_id ||
-         (f.getGroupId() || "{NoGroupId}") == curUrlData.detected_feed_id));
+         (f.keyId || "") == curUrlData.detected_feed_id));
 };
 
 window.addAllRelevantFeedCountsToDiags = function(f, allFeedsMap, feedDiags) {
@@ -376,6 +376,7 @@ window.addAllFeedThreadsToDiags = function(f, feedDiags, rtc, relevantFeedIdProp
         //threadDiags.thread_model_data._clientHooks = "Redacted";
         // Eliminate cyclic ref to thread model in the tv clone
         (threadDiags._thread_viewed_data || {}).thread = "RedactedCyclic";
+        ((threadDiags._thread_viewed_data || {}).options||{}).thread = "RedactedCyclic";
 
         cached__loaded_thread_state_map[threadStateKey] =
             (cached__loaded_thread_state_map[threadStateKey] || {});
@@ -453,7 +454,7 @@ window.addCurrentUserAndUrlData = function(allFeedsMap) {
     cUrl.detected_feed_type =
         (cUrl.parsed_url_hash.queryKey.type || "").replace("in_","");
     cUrl.detected_feed_id =
-        cUrl.parsed_url_hash.queryKey.feedId;
+        cUrl.parsed_url_hash.queryKey.feedId || "";
 
 
 };
@@ -625,7 +626,7 @@ window.debugSeenUnseenInFeed = function(f, allFeedsMap) {
 
     var rtcOrUndefined = (f.getClient && f.getClient());
     var feedIsConnected = (f.isRealtimeConnected && f.isRealtimeConnected());
-    var rtcStateKey = feedIsConnected ?
+    var rtcStateKey = !feedIsConnected ?
         "UnconnectedFeeds" :
         "ConnectedFeeds";
 
@@ -856,7 +857,7 @@ if(typeof(unsafeWindow) != "undefined") {
     unsafeWindow.seen_unseen_devdebug = false;
 }
 
-})(require('yam._'));
+})(require('yam._'),window.unsafeWindow || window);
 
 // Note that only IDs, counts, and timestamps should be in the data so users can
 // trust that no auth tokens or message content are being leaked to the debug post
