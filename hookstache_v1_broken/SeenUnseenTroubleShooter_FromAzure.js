@@ -31,7 +31,7 @@ window.yam = _.extend(yam,
 window.yam.uri = require("core/lib/uri_helper");
 window.yam.getCurrentUser = _.bind(window.yam.getCurrentUser,require("core/lib/session"));
 
-console.trace("LOADING SeenUnseenTroubleshooter using tampermonkey. Call JSON.stringify(debugSeenUnseenInAllFeeds(), null, ' '); to debug");
+window.console.trace("LOADING SeenUnseenTroubleshooter using tampermonkey. Call JSON.stringify(debugSeenUnseenInAllFeeds(), null, ' '); to debug");
 
 // Circular reference protected JSON.stringify found here: http://stackoverflow.com/a/17773553
 JSON.stringifyOnce = function(obj, replacer, indent){
@@ -799,7 +799,7 @@ window.triggerSeenUnseenDiagnostics = function(theWindow) {
         },
         (globalTarget[diagPropKey] || {}),
         "__jsonStringifyWarning",
-        function (jsonExp) {
+        function () {
             // If stirgify fails use stringifyOnce which will be conservative with avoiding cycles and
             //  truncating output when it is too long
             diagString =
@@ -811,7 +811,7 @@ window.triggerSeenUnseenDiagnostics = function(theWindow) {
     },
     globalTarget,
     diagPropKey,
-    function (diagsExp) {
+    function () {
         window.popupDiagnosticDiv("var " + diagPropKey + " = " +
            JSON.stringify(globalTarget[diagPropKey], null, " ") + ";");
     });
@@ -841,21 +841,10 @@ window.handleExceptions = function(funcToRun, objToAddError, keyToAddError, erro
             }, objToAddError, keyToAddError, null); // null error handler in this nested call
         }
 
-        if(!!unsafeWindow.seen_unseen_devdebug) { throw exp; }
+        if(!!window.seen_unseen_devdebug) { throw exp; }
     }
 };
 
-
-// Tampermonkey uses unsafeWindow object
-if(typeof(unsafeWindow) != "undefined") {
-    unsafeWindow.ensureDebugDiagArea = window.ensureDebugDiagArea;
-    unsafeWindow.popupDiagnosticDiv = window.popupDiagnosticDiv;
-    unsafeWindow.debugSeenUnseenInFeed = window.debugSeenUnseenInFeed;
-    unsafeWindow.debugSeenUnseenInAllFeeds = window.debugSeenUnseenInAllFeeds;
-    unsafeWindow.triggerSeenUnseenDiagnostics = window.triggerSeenUnseenDiagnostics;
-
-    unsafeWindow.seen_unseen_devdebug = false;
-}
 
 })(require('yam._'),window.unsafeWindow || window, window);
 
