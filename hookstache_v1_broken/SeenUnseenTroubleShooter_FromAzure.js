@@ -707,7 +707,8 @@ window.debugSeenUnseenInFeed = function(f, allFeedsMap) {
 };
 
 window.feedKeyForFeed = function(f) {
-    var feedKey = f.url;
+    var feedKeyV2 = (f.keyType + (f.keyId||"") || "");
+    var feedKey = f.getUrl();
     var apiIndex = feedKey.indexOf("/api/v1/");
     if(apiIndex > 1) {
         feedKey = feedKey.substr(apiIndex + "/api/v1/".length - 1);
