@@ -16,8 +16,8 @@ var debugTimeout = null;
 //var console = console || window.console;
 //var _ = _ || window._;
 //var yd = yd || window.yd;
-//var HookStache_SCRIPT = HookStache_SCRIPT || window.HookStache_SCRIPT;
-//var HookStache_H = HookStache_H || window.HookStache_H;
+var HookStache_SCRIPT = HookStache_SCRIPT || window.HookStache_SCRIPT;
+var HookStache_H = HookStache_H || window.HookStache_H;
 //var unsafeWindow = unsafeWindow || window;
 function setYamConfigToDebug() {
     console.log("Calling setYamConfigToDebug to set up debug environment.");
@@ -47,6 +47,10 @@ function setYamConfigToDebug() {
                             'yam.model.User': "mdl.U",
                             'models/lib/helper/modular_feeds_experiment': 'modular_feeds_experiment',
                             'core/lib/yammer_api': 'api',
+
+                            'core/lib/pubsub': 'pubsub',
+                            'feeds/lib/ui/attachments/uploader': 'uploader',
+
                             'models/lib/model/helper/report_feed_events': 'report_feed_events',
                             'feeds/lib/ui/threads/future/feed_delegate': 'ui.feedDelegate',
                             'models/lib/helper/realtime_connection_factory': 'rt.modular.factory',
@@ -66,6 +70,13 @@ function setYamConfigToDebug() {
 'models/lib/helper/feed_fetcher': 'process.modular.feedFetcher',
                             "core/lib/client/message_payload": 'process.both.messagePayload',
 
+'models/lib/backbone/collection/global_viewed_states': 'gvs',
+'models/lib/helper/feed_factory': 'feed_factory',
+'models/lib/helper/viewed_state_helper': 'viewed_state_helper',
+'models/lib/backbone/model/viewed_state': 'viewed_state',
+'models/lib/backbone/viewed_state_collection': 'viewed_state_collection',
+
+
 'core/lib/uri_helper':'uriHelper'
                         },
 
@@ -83,7 +94,6 @@ function setYamConfigToDebug() {
     }
 });
                 window.yd.a = {};
-
                 // First copy func from 'core/lib/namespace' to get yd.val
                 window.yd.val = function (root, path, value) {
                     path = path||"";
@@ -135,16 +145,26 @@ function setYamConfigToDebug() {
                 // LET's DEFINE some useful toString functions
              try
              {
-                yd.a.mdl.F.prototype.toString = function () {
-                    return "[feed:"+
+yd.a.viewed_state.prototype.toString = function(verbose) {
+  var eo = this;
+  return (eo.isViewed()?"old":"uv")+":"+eo.get('lastReplyMessageId')+":"+eo.get('lastViewedMessageId')+":"+eo.get('id');
+}
+
+yd.a.mdl.F.prototype.toString = function (verbose) {
+                    var retVal = "[feed:"+
                         this.keyType + ":" + (this.keyId||"") +
-                         " has1stPayld?:" + this._hasFirstPayload +
-                         " unseen:" + this.unseen_thread_count +
+                         " unv:" + this.getUnseenThreadCount() +
                          " newest:" + this.newest_message_id +
                          " oldest:"+ this._oldest_threaded_id +
-                        (!this._olderAvailable ? (" hasOlder:"+this._olderAvailable) : "") +
+                        (_.isBoolean(this._olderAvailable) ? (" hasOlder:"+this._olderAvailable) : "") +
                         " realtime:"+(this._realtimeConnection && this.isRealtimeConnected()) +
+                         " hasPayld?:" + this._hasFirstPayload +
                       "]";
+                    if (verbose) {
+                        retVal += "\nThreadViewedStates:\n" +
+                            (this.feedCounter && this.feedCounter._viewedStates.models.sort().reverse().join('\n'));
+                    }
+    return retVal;
                 };
                 yd.feedPropToStringTemplate = function (classAlias, feedPropPath) {
                     var feedObj = yd.val(this,(feedPropPath||"")) || yd.val(this,"feed") || yd.val(this,"_feed") || yd.val(this,"options.feed");
@@ -160,6 +180,12 @@ function setYamConfigToDebug() {
                 yd.a.process.both.announcementBubblingProcessor.prototype.toString =_.partial(yd.feedPropToStringTemplate,"ancmntPayldPrcsr",'_feed');
 
                  yd.a.process.both.modelRepository.prototype.toString = function(){return "[ORMTransaction]";};
+                 
+                 yd.p = function(col, verbose) {
+                     var obj = yd.val(yd.a.mdl,col) || yd.val(yd.a,col) ||  yd.val(yd,col) ||  yd.val(window,col) || [col,"Not Found"];
+                     obj = obj.models ||  (obj.all ? obj.all() : obj);
+                     console.log(_.map(obj, function(eo){ return eo.toString(verbose)}).join('\n'));
+                 }
 
                  yd.a.process.both.messagePayload.prototype.toString = function() {
                      return "[msgPayload" +
@@ -192,7 +218,7 @@ function setYamConfigToDebug() {
              }
              catch(tse)
              {
-                 console.error("ERROR: Failure updating diagnostic toString() methods: ",tse)
+                 console.error("ERROR: Failure updating diagnostic toString() methods: ",tse);
              }
                 
                  window.yd.wrapWithDiags = function(obj,funcName,before,after, objPath) {
@@ -211,7 +237,7 @@ function setYamConfigToDebug() {
                         after:after,
                         context:objPath
                     });
-                    var go = fn._yd.go = function() {yd.dbg.inspect(fn._yd.origFunc);};
+//                    var go = fn._yd.go = function() {yd.dbg.inspect(fn._yd.origFunc);};
                      console.error("WRAPPING:",objPath,funcName,"with:",fn._yd);
                     var wrappedFunc = function() {
                         if(before) before.apply(this,arguments);
@@ -226,7 +252,7 @@ function setYamConfigToDebug() {
 
                window.yd.wrapAndLog = function(objPath, funcName) {
                     var obj = yd.val(window,objPath) ||  yd.val(unsafeWindow,objPath) || {};
-                    var func = obj[funcName];
+                    //var func = obj[funcName];
 
                     window.yd.wrapWithDiags(
                             obj,
@@ -293,7 +319,7 @@ window.yd.wrapAndLog('yd.a.mdl.F.prototype','setNewestMessageId'); // in feedCli
              try
              {
 // CALL it right away
-window.yd.logProcessorSteps();
+//window.yd.logProcessorSteps();
              }
                 catch(elog){ console.error("ERROR: Failure initializing log wrap diags",elog) }
                 
