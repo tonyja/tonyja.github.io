@@ -58,7 +58,7 @@ function setYamConfigToDebug() {
                             'models/lib/helper/realtime_message_resolver': 'rt.modular.messageResolver',
                             'models/lib/helper/realtime_fetchnewer_resolver': 'rt.modular.fetchNewerResolver',
 
-                            'models/lib/client/realtime_feed_client': 'rt.control.feedClient',
+//                            'models/lib/client/realtime_feed_client': 'rt.control.feedClient',
                             'models/lib/client/base_realtime_client': 'rt.control.baseClient',
 
 'core/lib/data/repository': 'process.both.modelRepository',
@@ -117,7 +117,7 @@ function setYamConfigToDebug() {
                   };
 
                 console.log("Adding 'yd' object with global yam functions for debug",window.yd);
-                
+
                 window.yd.Mustache = require('Mustache');
 
                 window.yd.addAlias = function(pair) {
@@ -145,9 +145,18 @@ function setYamConfigToDebug() {
                 // LET's DEFINE some useful toString functions
              try
              {
+
 yd.a.viewed_state.prototype.toString = function(verbose) {
   var eo = this;
-  return (eo.isViewed()?"old":"uv")+":"+eo.get('lastReplyMessageId')+":"+eo.get('lastViewedMessageId')+":"+eo.get('id');
+  var retVal = (yd.a.viewed_state_helper.isViewed(eo)?"old":"uv")+":";
+    retVal += eo.get('lastReplyMessageId')+":"+eo.get('lastViewedMessageId')+":"+eo.get('id');
+    retVal += ":"+eo.get('feedFetchType')+":"+eo.get('dataOrigin');
+    if (verbose) {
+        retVal += "\nLastChange:" + JSON.stringify(eo.changed||{});
+        var previousValues = _.pick(eo._previousAttributes,_.keys(eo.changed));
+        retVal += "\nPreviousValues:" + JSON.stringify(previousValues);
+    }
+    return retVal;
 }
 
 yd.a.mdl.F.prototype.toString = function (verbose) {
@@ -161,7 +170,7 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                          " hasPayld?:" + this._hasFirstPayload +
                       "]";
                     if (verbose) {
-                        retVal += "\nThreadViewedStates:\n" +
+                        retVal += "\n" +
                             (this.feedCounter && this.feedCounter._viewedStates.models.sort().reverse().join('\n'));
                     }
     return retVal;
@@ -185,8 +194,14 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                      var obj = yd.val(yd.a.mdl,col) || yd.val(yd.a,col) ||  yd.val(yd,col) ||  yd.val(window,col) || [col,"Not Found"];
                      obj = obj.models ||  (obj.all ? obj.all() : obj);
                      console.log(_.map(obj, function(eo){ return eo.toString(verbose)}).join('\n'));
-                 }
-
+                 };
+                 yd.dump = function(verbose) {
+                     console.log(Date() +" " + Date.now());
+                     yd.p('gvs',verbose);
+                     yd.p('F',verbose);
+                     console.log(Date() +" " + Date.now());
+                 };
+                 window.document.body.ondblclick = yd.dump;
                  yd.a.process.both.messagePayload.prototype.toString = function() {
                      return "[msgPayload" +
                          " type:" + yd.val(this,'_raw.meta.feed_name') +
@@ -210,8 +225,8 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                          " hasOlder:"+this._hasOlderAvailable +
                       "]";
                 };
-                 
-                yd.a.rt.control.feedClient.prototype.toString = _.partial(yd.realtimeClientToStringTemplate,"feedClient");
+
+//              yd.a.rt.control.feedClient.prototype.toString = _.partial(yd.realtimeClientToStringTemplate,"feedClient");
                 yd.a.rt.control.baseClient.prototype.toString = _.partial(yd.realtimeClientToStringTemplate,"baseClient");
 
 
@@ -220,7 +235,7 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
              {
                  console.error("ERROR: Failure updating diagnostic toString() methods: ",tse);
              }
-                
+
                  window.yd.wrapWithDiags = function(obj,funcName,before,after, objPath) {
                     var fn = yd.val(obj,funcName);
                     if(!fn)
@@ -259,7 +274,7 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                             funcName,
                             function(){
                                 console.group();
-                                
+
                                 var argsString = _.map(arguments,function(arg){return ("function"=== typeof(arg)) ? "function(){...}" : (arg||"{empty}").toString();}).join(", ");
                                 var stackTrace = Error().stack;
                                 window.yd.stacktrack = window.yd.stacktrack||{};
@@ -268,11 +283,11 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                                               funcName,"(",argsString,") (proto=",objPath,")\n",
                                               "ON: ",(this||"{no 'this'}").toString(),
                                               "\nCall details: arguments=",arguments,"this=",this);
-                                
+
                                 //debugger;
                             },
                             function(){
-                                
+
                                 console.groupEnd();
                                 //console.error("AFTER reportFeedEvent:",arguments,this);
                                 //debugger;
@@ -322,7 +337,7 @@ window.yd.wrapAndLog('yd.a.mdl.F.prototype','setNewestMessageId'); // in feedCli
 //window.yd.logProcessorSteps();
              }
                 catch(elog){ console.error("ERROR: Failure initializing log wrap diags",elog) }
-                
+
 
 
 /*
@@ -347,11 +362,11 @@ window.yd.wrapAndLog('yd.a.mdl.F.prototype','setNewestMessageId'); // in feedCli
                     // Execute on the devtools commandline to make the commandline API functions for that instance available to the JS in the window
                     // https://developer.chrome.com/devtools/docs/commandline-api
                     eval("window.yd.dbg = {inspect,debug,undebug, getEventListeners,keys,values,monitor,unmonitor}");
-                    
+
                     // If the https://github.com/amasad/debug_utils extension is installed then add that too
                     window.yd.dbg.debugUtils = window['debugUtils'];
                 };
-                
+
 
                 if(typeof(unsafeWindow) != "undefined") unsafeWindow.yd = window.yd;
                 //unsafeWindow.BootstrapHook(unsafeWindow);
