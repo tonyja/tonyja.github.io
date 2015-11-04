@@ -139,8 +139,10 @@ function setYamConfigToDebug() {
                     }
                 };
 
+                console.groupCollapsed('(+Expand for details) Adding the following aliases to the "yd.a" debug namespace:',_.uniq(_.values(yd._config.aliases)));
                 /// HERE is where the alias map is defined
                 _.chain(yd._config.aliases).pairs().each(yd.addAlias).value();
+                console.groupEnd()
 
                 // LET's DEFINE some useful toString functions
              try
@@ -148,8 +150,8 @@ function setYamConfigToDebug() {
 
 yd.a.viewed_state.prototype.toString = function(verbose) {
   var eo = this;
-  var retVal = (yd.a.viewed_state_helper.isViewed(eo)?"old":"uv")+":";
-    retVal += eo.get('lastReplyMessageId')+":"+eo.get('lastViewedMessageId')+":"+eo.get('id');
+  var retVal = eo.get('lastReplyMessageId')+":"+(yd.a.viewed_state_helper.isViewed(eo)?"":"UV")+":";
+    retVal += eo.get('lastViewedMessageId')+":"+eo.get('id');
     retVal += ":"+eo.get('feedFetchType')+":"+eo.get('dataOrigin');
     if (verbose) {
         retVal += "\nLastChange:" + JSON.stringify(eo.changed||{});
@@ -196,10 +198,15 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                      console.log(_.map(obj, function(eo){ return eo.toString(verbose)}).join('\n'));
                  };
                  yd.dump = function(verbose) {
-                     console.log(Date() +" " + Date.now());
-                     yd.p('gvs',verbose);
-                     yd.p('F',verbose);
-                     console.log(Date() +" " + Date.now());
+                     console.groupCollapsed("(+Expand for details) Viewed States and Feed Counts - " + Date() +" " + Date.now());
+                       console.groupCollapsed("(+Expand for details) All Global Viewed States and Changes");
+                         yd.p('gvs',verbose);
+                       console.groupEnd();
+                       console.group("(+Expand for details) Feed Counts and Viewed States");
+                         yd.p('F',verbose);
+                       console.groupEnd();
+                     console.groupEnd();
+                     console.log("DONE Viewed States and Feed Counts - " + Date() +" " + Date.now());
                  };
                  window.document.body.ondblclick = yd.dump;
                  yd.a.process.both.messagePayload.prototype.toString = function() {
