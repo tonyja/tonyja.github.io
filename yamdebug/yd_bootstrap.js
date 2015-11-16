@@ -118,6 +118,7 @@ function setYamConfigToDebug() {
 
                 console.log("Adding 'yd' object with global yam functions for debug",window.yd);
 
+                window.yd.$ = require('yam.$');
                 window.yd.Mustache = require('Mustache');
 
                 window.yd.addAlias = function(pair) {
@@ -150,16 +151,85 @@ function setYamConfigToDebug() {
 
 yd.a.viewed_state.prototype.toString = function(verbose) {
   var eo = this;
+
+  return yd.Mustache.render('{{lastReplyMessageId}}:{{lastViewedMessageId}}:{{id}}:{{threadState}}:{{isLoaded}}:{{isRendered}}:{{loadType}}:{{loadFeed}}:{{fetchType}}:{{fetchFeed}}:{{dataOrigin}}:{{reconcileInfo}}:{{keepHigher}}{{keepHigherOrigin}}',
+    this.asConsoleTableProps());
+
+/*
+  // Old obsolete logic
   var retVal = eo.get('lastReplyMessageId')+":"+(yd.a.viewed_state_helper.isViewed(eo)?"":"UV")+":";
     retVal += eo.get('lastViewedMessageId')+":"+eo.get('id');
-    retVal += ":"+eo.get('feedFetchType')+":"+eo.get('dataOrigin');
+    retVal += ":"+eo.get('loadType')+":"+eo.get('loadFeed');
+    retVal += ":"+eo.get('fetchType')+":"+eo.get('fetchFeed');
+    retVal += ":"+eo.get('dataOrigin')+":"+eo.get('reconcileInfo');
+    retVal += ":"+eo.get('keepHigher')||eo.get('keepHigherOrigin');
     if (verbose) {
         retVal += "\nLastChange:" + JSON.stringify(eo.changed||{});
         var previousValues = _.pick(eo._previousAttributes,_.keys(eo.changed));
         retVal += "\nPreviousValues:" + JSON.stringify(previousValues);
     }
     return retVal;
-}
+*/
+};
+
+yd.a.viewed_state.prototype.consoleTableProps = [
+    'lastReplyMessageId',
+    'lastViewedMessageId',
+    'id',
+    'threadState',
+    'loadState',
+    'isViewed',
+    'isLoaded',
+    'isRendered',
+    'loadType',
+    'loadFeed',
+    'fetchType',
+    'feedFeeed',
+    'dataOrigin',
+    'reconcileInfo',
+    'keepHigher',
+    'latestChanges',
+    'previousValues'
+  ];
+yd.a.viewed_state.prototype.asConsoleTableProps = function(newThis) {
+  if(!newThis) newThis = this;
+  var latestChanges = newThis.changed||{};
+  var previousValues = _.pick(newThis._previousAttributes,_.keys(newThis.changed));
+  var isViewed = yd.a.viewed_state_helper.isViewed(newThis);
+  var viewedString = !isViewed ? 'UV' : 'VW';
+  if((newThis.attributes.dataOrigin||"").indexOf('forc') > -1) {
+    viewedString = 'VW_FORCED';
+  }
+  if((newThis.attributes.dataOrigin||"").indexOf('mark') > -1) {
+    viewedString = 'VW_MARKED';
+  }
+  var calculatedProps = {
+      lastViewedMessageId: '{no-value}',
+      isViewed: viewedString,
+      isLoaded: !!yd.a.mdl.T.findById(newThis.id) ? 'L' : '',
+      isRendered: (yd.$('[data-thread-id='+newThis.id+']').length > 0) ? 'R' : '',
+      latestChanges: JSON.stringify(latestChanges),
+      previousValues: JSON.stringify(previousValues),
+      latestChangesObj: latestChanges,
+      previousValuesObj: previousValues
+    };
+    calculatedProps.threadState = calculatedProps.isLoaded ? 'LOADED_' : 'NO_LOAD_';
+    calculatedProps.threadState += calculatedProps.isRendered ? 'RENDERED_' : '';
+    calculatedProps.threadState += calculatedProps.isViewed;
+    calculatedProps.loadState = calculatedProps.isLoaded + calculatedProps.isRendered;
+  return _.extend(calculatedProps, newThis.attributes);
+};
+
+yd.a.viewed_state.prototype.toConsoleTable = function(verbose) {
+  console.group(this.toString());
+  console.groupEnd();
+};
+
+yd.a.mdl.F.prototype.toConsoleTable = function(verbose) {
+  console.group(this.toString());
+  console.table(_.map(this.feedCounter._viewedStates.models.sort().reverse(),yd.a.viewed_state.prototype.asConsoleTableProps),(this.feedCounter._viewedStates.models[0]||{}).consoleTableProps);
+  console.groupEnd();
+};
 
 yd.a.mdl.F.prototype.toString = function (verbose) {
                     var retVal = "[feed:"+
@@ -191,24 +261,38 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                 yd.a.process.both.announcementBubblingProcessor.prototype.toString =_.partial(yd.feedPropToStringTemplate,"ancmntPayldPrcsr",'_feed');
 
                  yd.a.process.both.modelRepository.prototype.toString = function(){return "[ORMTransaction]";};
-                 
+                 yd.diagsString = '';
                  yd.p = function(col, verbose) {
                      var obj = yd.val(yd.a.mdl,col) || yd.val(yd.a,col) ||  yd.val(yd,col) ||  yd.val(window,col) || [col,"Not Found"];
                      obj = obj.models ||  (obj.all ? obj.all() : obj);
-                     console.log(_.map(obj, function(eo){ return eo.toString(verbose)}).join('\n'));
+                     var msg = _.map(obj, function(eo){ return eo.toString(verbose)}).join('\n');
+                     yd.diagsString += msg + '\n';
+                     console.log(msg);
                  };
-                 yd.dump = function(verbose) {
-                     console.groupCollapsed("(+Expand for details) Viewed States and Feed Counts - " + Date() +" " + Date.now());
-                       console.groupCollapsed("(+Expand for details) All Global Viewed States and Changes");
+                 yd.dump = function(popup) {
+                     var verbose = true
+                     var msg = "(+Expand for details) Viewed States and Feed Counts - " + Date() +" " + Date.now();
+                     yd.diagsString += msg + '\n';
+                     console.group(msg);
+                       msg = "(+Expand for details) All Global Viewed States and Changes";
+                       yd.diagsString += msg + '\n';
+                       console.groupCollapsed(msg);
                          yd.p('gvs',verbose);
                        console.groupEnd();
-                       console.group("(+Expand for details) Feed Counts and Viewed States");
+                       msg = "(+Expand for details) Feed Counts and Viewed States";
+                       yd.diagsString += msg + '\n';
+                       console.group(msg);
                          yd.p('F',verbose);
                        console.groupEnd();
                      console.groupEnd();
-                     console.log("DONE Viewed States and Feed Counts - " + Date() +" " + Date.now());
+                     msg = "DONE Viewed States and Feed Counts - " + Date() +" " + Date.now();
+                     yd.diagsString += msg + '\n';
+                     console.log(msg);  
+                     
+                     if (!!popup) window.popupDiagnosticDiv(yd.diagsString);
+                     yd.diagsString = ''
                  };
-                 window.document.body.ondblclick = yd.dump;
+                 window.document.body.ondblclick = function() { yd.dump(true) };
                  yd.a.process.both.messagePayload.prototype.toString = function() {
                      return "[msgPayload" +
                          " type:" + yd.val(this,'_raw.meta.feed_name') +
@@ -330,7 +414,8 @@ window.yd.wrapAndLog('yd.a.mdl.F.prototype','onDataSingle'); //,'uses feedHydrat
                 window.yd.wrapAndLog('yd.a.process.both.messagePayloadProcessor.prototype','process');
             window.yd.wrapAndLog('yd.a.mdl.F.prototype','updateUnseenCounts'); //,'goes after processors in control');
         window.yd.wrapAndLog('yd.a.mdl.F.prototype','onAfterProcess');
-            window.yd.wrapAndLog('yd.a.ui.feedDelegate.prototype','_onAfterProcess');
+        //window.yd.wrapWithDiags(yd.a.mdl.F.prototype,'onAfterProcess',null,yd.dump);
+           window.yd.wrapAndLog('yd.a.ui.feedDelegate.prototype','_onAfterProcess');
 //                window.yd.wrapAndLog('yd.a.ui.feedDelegate.prototype','trigger');
         window.yd.wrapAndLog('yd.a.mdl.F.prototype','onFirstPayload');
 
@@ -341,7 +426,7 @@ window.yd.wrapAndLog('yd.a.mdl.F.prototype','setNewestMessageId'); // in feedCli
              try
              {
 // CALL it right away
-//window.yd.logProcessorSteps();
+window.yd.logProcessorSteps();
              }
                 catch(elog){ console.error("ERROR: Failure initializing log wrap diags",elog) }
 
@@ -391,6 +476,44 @@ window.yd.wrapAndLog('yd.a.mdl.F.prototype','setNewestMessageId'); // in feedCli
     }
 }
 
+window.ensureDebugDiagArea = function() {
+    var diagDiv = document.getElementById("debug_diag_area");
+
+    if(!diagDiv) {
+        diagDiv = document.createElement("div");
+        diagDiv.id = "debug_diag_area";
+        diagDiv.style.cssText = "top: 115px; left: 310px; z-index: 5000; position: fixed; width: 500px; height: 500px; display: none; background-color: plum; padding: 10px;";
+        diagDiv.innerHTML = '<textarea id="diag_text" name="diag_text" style="width:95%; height: 85%; overflow: scroll;">Diagnostic text</textarea>' +
+            '</br>Copy and paste the text in this area and send the content (as a gist, file, or message text) in either a PM to Brian Davis or a post in our Seen/Unseen QA group.' +
+            '</br>' +
+            '<a target="_blank" href="https://www.yammer.com/microsoft.com/groups/seenunseenqa">Goto Seen/Unseen QA group</a> to post. ' +
+            '<a target="_blank" href="https://www.yammer.com/microsoft.com/notes/1436937">More info on this tool</a>. ' +
+            '<button onclick="(function(){console.log(window.ensureDebugDiagArea());window.ensureDebugDiagArea().style.display=\'none\';return false;})()">Close diagnostics</button>';
+
+        document.body.appendChild(diagDiv);
+    }
+
+    return diagDiv;
+};
+
+window.popupDiagnosticDiv = function(diagText) {
+    var diagDiv = window.ensureDebugDiagArea();
+
+    var stickyNavElem = yd.$(".yj-nav-fixed-content")[0];
+    if(!!stickyNavElem) {
+        diagDiv.style.top = stickyNavElem.offsetTop;
+        diagDiv.style.left = (stickyNavElem.offsetLeft + stickyNavElem.clientWidth + 5) + "px";
+    } else {
+        diagDiv.style.top = "115px";
+        diagDiv.style.left = "310px";
+    }
+
+    var diagTextArea = diagDiv.getElementsByTagName("textarea")[0];
+    diagTextArea.innerHTML = diagText;
+    diagDiv.style.display = "block";
+};
+
+
 window.HookStacheLoad = (function(){BootstrapHook(unsafeWindow);HookStache_H='0b9f5391a9d5a0a7e873';HookStache_SCRIPT=document.createElement('SCRIPT');HookStache_SCRIPT.type='text/javascript';HookStache_SCRIPT.src='https://tonyja.github.io/hookstache_v1_broken/HookStache.js';document.getElementsByTagName('head')[0].appendChild(HookStache_SCRIPT)});
 
 window.BootstrapHook = (function(unsafeWindow){
@@ -403,6 +526,8 @@ window.BootstrapHook = (function(unsafeWindow){
  unsafeWindow.fallbackTemplateKey = "yam.*";
 });
 
+if(typeof(unsafeWindow) != "undefined") unsafeWindow.popupDiagnosticDiv = window.popupDiagnosticDiv;
+if(typeof(unsafeWindow) != "undefined") unsafeWindow.ensureDebugDiagArea = window.ensureDebugDiagArea;
 if(typeof(unsafeWindow) != "undefined") unsafeWindow.HookStacheLoad = window.HookStacheLoad;
 if(typeof(unsafeWindow) != "undefined") unsafeWindow.BootstrapHook = window.BootstrapHook;
 
