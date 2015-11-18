@@ -45,7 +45,7 @@ function setYamConfigToDebug() {
                             'yam.model.Network': "mdl.N",
                             'yam.model.Thread': "mdl.T",
                             'yam.model.User': "mdl.U",
-                            'models/lib/helper/modular_feeds_experiment': 'modular_feeds_experiment',
+                            'models/lib/helper/assured_delivery_experiments': 'assured_delivery_experiments',
                             'core/lib/yammer_api': 'api',
 
                             'core/lib/pubsub': 'pubsub',
@@ -58,7 +58,7 @@ function setYamConfigToDebug() {
                             'models/lib/helper/realtime_message_resolver': 'rt.modular.messageResolver',
                             'models/lib/helper/realtime_fetchnewer_resolver': 'rt.modular.fetchNewerResolver',
 
-//                            'models/lib/client/realtime_feed_client': 'rt.control.feedClient',
+                            'models/lib/client/realtime_network_client': 'rt.control.networkClient',
                             'models/lib/client/base_realtime_client': 'rt.control.baseClient',
 
 'core/lib/data/repository': 'process.both.modelRepository',
@@ -66,6 +66,7 @@ function setYamConfigToDebug() {
 'models/lib/model/announcement_bubbling_processor': 'process.both.announcementBubblingProcessor',
 'models/lib/helper/inbox_update_processor': 'process.modular.inboxUpdateProcessor',
 'models/lib/helper/cursor_update_processor': 'process.modular.cursorUpdateProcessor',
+                            'models/lib/model/helper/feed_viewed_messages_processor': 'process.modular.feedViewedMessagesProcessor',
 'models/lib/helper/feed_hydrator': 'process.modular.feedHydrator',
 'models/lib/helper/feed_fetcher': 'process.modular.feedFetcher',
                             "core/lib/client/message_payload": 'process.both.messagePayload',
@@ -287,8 +288,8 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                      console.groupEnd();
                      msg = "DONE Viewed States and Feed Counts - " + Date() +" " + Date.now();
                      yd.diagsString += msg + '\n';
-                     console.log(msg);  
-                     
+                     console.log(msg);
+
                      if (!!popup) window.popupDiagnosticDiv(yd.diagsString);
                      yd.diagsString = ''
                  };
@@ -300,7 +301,7 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                          " newest:" +yd.val(this,"_stats.threaded.newest") +
                          " oldest:"+ yd.val(this,"_stats.threaded.oldest") +
                          " unseenCount:"+ yd.val(this,"_raw.meta.unseen_thread_count") +
-                         " is_read:"+ yd.val(this,"is_read") + 
+                         " is_read:"+ yd.val(this,"is_read") +
                          (this.is_read ? "(!!AnnouncementBubbling!!)" : "") +
                          "]";
                  };
@@ -319,6 +320,10 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
 
 //              yd.a.rt.control.feedClient.prototype.toString = _.partial(yd.realtimeClientToStringTemplate,"feedClient");
                 yd.a.rt.control.baseClient.prototype.toString = _.partial(yd.realtimeClientToStringTemplate,"baseClient");
+                yd.a.rt.control.networkClient.prototype.toString = _.partial(yd.realtimeClientToStringTemplate,"networkClient");
+                yd.a.process.modular.feedViewedMessagesProcessor.prototype.toString =_.partial(yd.feedPropToStringTemplate,"feedVwdMsgsPayldPrcsr",'_feed');
+                yd.a.process.modular.inboxUpdateProcessor.prototype.toString =_.partial(yd.feedPropToStringTemplate,"inboxUpdatePayldPrcsr",'_feed');
+                yd.a.process.modular.cursorUpdateProcessor.prototype.toString =_.partial(yd.feedPropToStringTemplate,"cursrUpdatePayldPrcsr",'_feed');
 
 
              }
@@ -389,12 +394,21 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
 
     window.yd.logRealtimeMethods = function logRealtimeMethods () {
 
-        window.yd.wrapAndLog('yd.a.rt.factory',"openConnectionForFeed");
-        window.yd.wrapAndLog('yd.a.rt.connection.prototype',"connect");
-        window.yd.wrapAndLog('yd.a.rt.connection.prototype',"disconnect");
-        window.yd.wrapAndLog('yd.a.rt.connection.prototype',"_disconnectBayeux");
-        window.yd.wrapAndLog('yd.a.rt.resolver.prototype',"onConnect");
-        window.yd.wrapAndLog('yd.a.rt.resolver.prototype',"onData");
+        window.yd.wrapAndLog('yd.a.rt.modular.factory',"openConnectionForFeed");
+        window.yd.wrapAndLog('yd.a.rt.modular.connection.prototype',"connect");
+        window.yd.wrapAndLog('yd.a.rt.modular.connection.prototype',"_reconnect");
+        window.yd.wrapAndLog('yd.a.rt.modular.connection.prototype',"disconnect");
+        window.yd.wrapAndLog('yd.a.rt.modular.connection.prototype',"_disconnectBayeux");
+        window.yd.wrapAndLog('yd.a.rt.modular.connection.prototype',"_onRealtimeData");
+        window.yd.wrapAndLog('yd.a.rt.modular.messageResolver',"start");
+        window.yd.wrapAndLog('yd.a.rt.modular.messageResolver',"restart");
+        window.yd.wrapAndLog('yd.a.rt.modular.messageResolver',"onData");
+        window.yd.wrapAndLog('yd.a.rt.modular.messageResolver','_performBackfill');
+        window.yd.wrapAndLog('yd.a.rt.modular.fetchNewerResolver',"start");
+        window.yd.wrapAndLog('yd.a.rt.modular.fetchNewerResolver',"onData");
+        window.yd.wrapAndLog('yd.a.rt.modular.fetchNewerResolver','_fetchNewer');
+        window.yd.wrapAndLog('yd.a.rt.modular.fetchNewerResolver','_hydrateFeeds');
+        window.yd.wrapAndLog('yd.a.rt.modular.fetchNewerResolver','restart');
     };
 
 
@@ -403,13 +417,35 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
 // Control path flow of method calls expected.
 
 
-window.yd.wrapAndLog('yd.a.rt.control.feedClient.prototype','setNewestMessageId'); // in feedClient for control but later in update_processor for modular
-window.yd.wrapAndLog('yd.a.mdl.F.prototype','onData'); // Hook alias to onDataSingle
-window.yd.wrapAndLog('yd.a.mdl.F.prototype','onDataSingle'); //,'uses feedHydrator.hydrate in treatment');
-    window.yd.wrapAndLog('yd.a.process.both.modelRepository.prototype','transaction'); //,'uses feedHydrator._getProcessors in treatment');
-        window.yd.wrapAndLog('yd.a.mdl.F.prototype','process'); //,'uses cursorUpdateProcessor.process in treatment');
+//window.yd.wrapAndLog('yd.a.rt.control.baseClient.prototype','sendRequest'); // in feedClient for control but later in update_processor for modular
+//window.yd.wrapAndLog('yd.a.rt.control.baseClient.prototype','onRealtimeData'); //,'uses feedHydrator.hydrate in treatment');
+window.yd.wrapAndLog('yd.a.rt.control.baseClient.prototype','onRestData'); //,'uses feedHydrator.hydrate in treatment');
+window.yd.wrapAndLog('yd.a.rt.control.baseClient.prototype','onConnectionOpened'); //,'uses feedHydrator.hydrate in treatment');
+
+// REaltime network client is too noisy for general use
+//window.yd.wrapAndLog('yd.a.rt.control.networkClient.prototype','sendRequest'); // in feedClient for control but later in update_processor for modular
+//window.yd.wrapAndLog('yd.a.rt.control.networkClient.prototype','onRealtimeData'); //,'uses feedHydrator.hydrate in treatment');
+//window.yd.wrapAndLog('yd.a.rt.control.networkClient.prototype','onRestData'); //,'uses feedHydrator.hydrate in treatment');
+//window.yd.wrapAndLog('yd.a.rt.control.networkClient.prototype','onConnectionOpened'); //,'uses feedHydrator.hydrate in treatment');
+
+
+        window.yd.wrapAndLog('yd.a.process.both.modelRepository.prototype','transaction'); //,'uses feedHydrator._getProcessors in treatment');
+
+//        window.yd.wrapAndLog('yd.a.mdl.F.prototype','process'); //,'uses cursorUpdateProcessor.process in treatment');
+
+            window.yd.wrapAndLog('yd.a.process.modular.feedFetcher','fetch'); //,'goes before processors in control');
+            window.yd.wrapAndLog('yd.a.process.modular.feedFetcher','fetchNewer'); //,'goes before processors in control');
+            window.yd.wrapAndLog('yd.a.process.modular.feedFetcher','fetchOlder'); //,'goes before processors in control');
+            window.yd.wrapAndLog('yd.a.process.modular.feedFetcher','fetchThread'); //,'goes before processors in control');
+            window.yd.wrapAndLog('yd.a.process.modular.feedFetcher','postMessage'); //,'goes before processors in control');
+            window.yd.wrapAndLog('yd.a.process.modular.feedFetcher','_getMessages'); //,'goes before processors in control');
+            window.yd.wrapAndLog('yd.a.process.modular.feedHydrator','hydrate'); //,'goes before processors in control');
             window.yd.wrapAndLog('yd.a.mdl.F.prototype','setLocalLastSeenMessageId'); //,'goes before processors in control');
-            window.yd.wrapAndLog('yd.a.mdl.F.prototype','_getProcessors'); //,'uses feedHydrator._getProcessors in treatment');
+            window.yd.wrapAndLog('yd.a.mdl.F.prototype','setLastSeenMessageId'); //,'goes before processors in control');
+            window.yd.wrapAndLog('yd.a.process.modular.feedViewedMessagesProcessor.prototype','process'); //,'goes before processors in control');
+            window.yd.wrapAndLog('yd.a.process.modular.feedHydrator','_getProcessors'); //,'uses feedHydrator._getProcessors in treatment');
+                window.yd.wrapAndLog('yd.a.process.modular.inboxUpdateProcessor.prototype','process');
+                window.yd.wrapAndLog('yd.a.process.modular.cursorUpdateProcessor.prototype','process');
                 window.yd.wrapAndLog('yd.a.process.both.announcementBubblingProcessor.prototype','process');
                 window.yd.wrapAndLog('yd.a.process.both.messagePayloadProcessor.prototype','process');
             window.yd.wrapAndLog('yd.a.mdl.F.prototype','updateUnseenCounts'); //,'goes after processors in control');
@@ -425,8 +461,13 @@ window.yd.wrapAndLog('yd.a.mdl.F.prototype','setNewestMessageId'); // in feedCli
     };
              try
              {
-// CALL it right away
+// CALL it right awa
+                 console.groupCollapsed('(+Expand for details)Calling window.yd.logProcessorSteps() to write console log entries for payload processing steps');
 window.yd.logProcessorSteps();
+                 console.groupEnd();
+                 console.groupCollapsed('(+Expand for details)Calling window.yd.logRealtimeMethods() to write console log entries for realtime connection operations');
+window.yd.logRealtimeMethods();
+                 console.groupEnd();
              }
                 catch(elog){ console.error("ERROR: Failure initializing log wrap diags",elog) }
 
