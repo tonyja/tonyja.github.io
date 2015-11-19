@@ -45,7 +45,7 @@ function setYamConfigToDebug() {
                             'yam.model.Network': "mdl.N",
                             'yam.model.Thread': "mdl.T",
                             'yam.model.User': "mdl.U",
-                            'models/lib/helper/modular_feeds_experiment': 'modular_feeds_experiment',
+                            'models/lib/helper/assured_delivery_experiments': 'assured_delivery_experiments',
                             'core/lib/yammer_api': 'api',
 
                             'core/lib/pubsub': 'pubsub',
@@ -58,7 +58,7 @@ function setYamConfigToDebug() {
                             'models/lib/helper/realtime_message_resolver': 'rt.modular.messageResolver',
                             'models/lib/helper/realtime_fetchnewer_resolver': 'rt.modular.fetchNewerResolver',
 
-//                            'models/lib/client/realtime_feed_client': 'rt.control.feedClient',
+                            'models/lib/client/realtime_network_client': 'rt.control.networkClient',
                             'models/lib/client/base_realtime_client': 'rt.control.baseClient',
 
 'core/lib/data/repository': 'process.both.modelRepository',
@@ -66,6 +66,7 @@ function setYamConfigToDebug() {
 'models/lib/model/announcement_bubbling_processor': 'process.both.announcementBubblingProcessor',
 'models/lib/helper/inbox_update_processor': 'process.modular.inboxUpdateProcessor',
 'models/lib/helper/cursor_update_processor': 'process.modular.cursorUpdateProcessor',
+                            'models/lib/model/helper/feed_viewed_messages_processor': 'process.modular.feedViewedMessagesProcessor',
 'models/lib/helper/feed_hydrator': 'process.modular.feedHydrator',
 'models/lib/helper/feed_fetcher': 'process.modular.feedFetcher',
                             "core/lib/client/message_payload": 'process.both.messagePayload',
@@ -75,17 +76,19 @@ function setYamConfigToDebug() {
 'models/lib/helper/viewed_state_helper': 'viewed_state_helper',
 'models/lib/backbone/model/viewed_state': 'viewed_state',
 'models/lib/backbone/viewed_state_collection': 'viewed_state_collection',
+'core/lib/yammer_request': 'request',
+'core/lib/report': 'report',
 
 
 'core/lib/uri_helper':'uriHelper'
-                        },
+                       },
 
 
         "yd.a.feed_delegate._onAfterProcess": {
             before: {
                 log: (function feed_delegate_updateModelIndexes() {
-                    console.error("feed_delegate._onAfterProcess. Items=",(this._feed.getThreads() || []).length,"first=",(this._feed.getThreads() || [{}])[0].id,this._feed.getUrl());
-                    console.error("feed_delegate._updateModelIndexes. Items=",(this._feed.getThreads() || []).length,"first=",(this._feed.getThreads() || [{}])[0].id,this._feed.getUrl());
+                    console.trace("feed_delegate._onAfterProcess. Items=",(this._feed.getThreads() || []).length,"first=",(this._feed.getThreads() || [{}])[0].id,this._feed.getUrl());
+                    console.trace("feed_delegate._updateModelIndexes. Items=",(this._feed.getThreads() || []).length,"first=",(this._feed.getThreads() || [{}])[0].id,this._feed.getUrl());
                     }),
                 debug: true,
                 trackStacks: true
@@ -140,10 +143,11 @@ function setYamConfigToDebug() {
                     }
                 };
 
-                console.groupCollapsed('(+Expand for details) Adding the following aliases to the "yd.a" debug namespace:',_.uniq(_.values(yd._config.aliases)));
+                console.groupCollapsed('(+) Adding the following aliases to the "yd.a" debug namespace:',_.uniq(_.values(yd._config.aliases)));
                 /// HERE is where the alias map is defined
                 _.chain(yd._config.aliases).pairs().each(yd.addAlias).value();
-                console.groupEnd()
+
+                console.groupEnd();
 
                 // LET's DEFINE some useful toString functions
              try
@@ -187,14 +191,14 @@ yd.a.viewed_state.prototype.consoleTableProps = [
     'feedFeeed',
     'dataOrigin',
     'reconcileInfo',
-    'keepHigher',
-    'latestChanges',
-    'previousValues'
+    'keepHigher' //,
+//    'latestChanges',
+//    'previousValues'
   ];
 yd.a.viewed_state.prototype.asConsoleTableProps = function(newThis) {
   if(!newThis) newThis = this;
   var latestChanges = newThis.changed||{};
-  var previousValues = _.pick(newThis._previousAttributes,_.keys(newThis.changed));
+//  var previousValues = _.pick(newThis._previousAttributes,_.keys(newThis.changed));
   var isViewed = yd.a.viewed_state_helper.isViewed(newThis);
   var viewedString = !isViewed ? 'UV' : 'VW';
   if((newThis.attributes.dataOrigin||"").indexOf('forc') > -1) {
@@ -207,11 +211,11 @@ yd.a.viewed_state.prototype.asConsoleTableProps = function(newThis) {
       lastViewedMessageId: '{no-value}',
       isViewed: viewedString,
       isLoaded: !!yd.a.mdl.T.findById(newThis.id) ? 'L' : '',
-      isRendered: (yd.$('[data-thread-id='+newThis.id+']').length > 0) ? 'R' : '',
-      latestChanges: JSON.stringify(latestChanges),
-      previousValues: JSON.stringify(previousValues),
-      latestChangesObj: latestChanges,
-      previousValuesObj: previousValues
+      isRendered: false, //(yd.$('[data-thread-id='+newThis.id+']').length > 0) ? 'R' : '',
+//      latestChanges: JSON.stringify(latestChanges),
+//      previousValues: JSON.stringify(previousValues),
+      latestChangesObj: latestChanges //,
+//      previousValuesObj: previousValues
     };
     calculatedProps.threadState = calculatedProps.isLoaded ? 'LOADED_' : 'NO_LOAD_';
     calculatedProps.threadState += calculatedProps.isRendered ? 'RENDERED_' : '';
@@ -266,33 +270,57 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                      var obj = yd.val(yd.a.mdl,col) || yd.val(yd.a,col) ||  yd.val(yd,col) ||  yd.val(window,col) || [col,"Not Found"];
                      obj = obj.models ||  (obj.all ? obj.all() : obj);
                      var msg = _.map(obj, function(eo){ return eo.toString(verbose)}).join('\n');
-                     yd.diagsString += msg + '\n';
-                     console.log(msg);
+                     console.log(yd.logd(msg));
+                 };
+                 yd.logd = function(input) {
+                     yd.diagsString += input + '\n';
+                     return input;
                  };
                  yd.dump = function(popup) {
-                     var verbose = true
-                     var msg = "(+Expand for details) Viewed States and Feed Counts - " + Date() +" " + Date.now();
-                     yd.diagsString += msg + '\n';
-                     console.group(msg);
-                       msg = "(+Expand for details) All Global Viewed States and Changes";
-                       yd.diagsString += msg + '\n';
-                       console.groupCollapsed(msg);
-                         yd.p('gvs',verbose);
-                       console.groupEnd();
-                       msg = "(+Expand for details) Feed Counts and Viewed States";
-                       yd.diagsString += msg + '\n';
-                       console.group(msg);
+                     var verbose = true;
+                     console.group(yd.logd("(+) Viewed States and Feed Counts - " + Date() +" " + Date.now()));
+
+                       console.log(yd.logd('KEEP THIS ID client_load_id: ' + yd.a.request.getPageLoadId()));
+
+                       var cu = yd.getCurrentUser();
+                       console.log(yd.logd('RGC tow_use_unviewed_ocular_counts: ' + cu.treatments.tow_use_unviewed_ocular_counts));
+                       console.log(yd.logd('ADUX tow_assured_delivery: ' + cu.treatments.tow_assured_delivery));
+                       console.log(yd.logd('Additional Logging tow_log_viewed_threads_fix: ' + cu.treatments.tow_log_viewed_threads_fix));
+
+                       var errorsInSession = _.union(yd.a.report.exception._errorsToReport,
+                               yd.a.report.exception._previouslyReported);
+                       if (errorsInSession.length > 0) {
+
+                          var errorTemplate = 'ERROR TimeStamp:{{ClientTimeStamp}} Message:"{{Parameters.message}}" Stack:[{{Parameters.stack}}]';
+                          var allErrorsString = _.map(errorsInSession,
+                              _.partial(yd.Mustache.render,errorTemplate)).join('\n');
+
+                          console.group(yd.logd('(+) JS errors reported in this session'));
+                            console.log(yd.logd(allErrorsString));
+                          console.groupEnd();
+                       }
+
+                       console.group(yd.logd("(+) Feed Counts and Viewed States"));
+
                          yd.p('F',verbose);
+
                        console.groupEnd();
+
+                       console.groupCollapsed(yd.logd("(+) All Global Viewed States and Changes"));
+
+                         yd.p('gvs',verbose);
+
+                       console.groupEnd();
+
                      console.groupEnd();
-                     msg = "DONE Viewed States and Feed Counts - " + Date() +" " + Date.now();
-                     yd.diagsString += msg + '\n';
-                     console.log(msg);  
-                     
+
+                     console.log(yd.logd("DONE Viewed States and Feed Counts - " + Date() +" " + Date.now()));
+
                      if (!!popup) window.popupDiagnosticDiv(yd.diagsString);
-                     yd.diagsString = ''
+                     yd.diagsString = '';
                  };
-                 window.document.body.ondblclick = function() { yd.dump(true) };
+                 yd.$('.yj-nav-menu')[0].ondblclick = function(){yd.dump(true)};
+
                  yd.a.process.both.messagePayload.prototype.toString = function() {
                      return "[msgPayload" +
                          " type:" + yd.val(this,'_raw.meta.feed_name') +
@@ -300,7 +328,7 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                          " newest:" +yd.val(this,"_stats.threaded.newest") +
                          " oldest:"+ yd.val(this,"_stats.threaded.oldest") +
                          " unseenCount:"+ yd.val(this,"_raw.meta.unseen_thread_count") +
-                         " is_read:"+ yd.val(this,"is_read") + 
+                         " is_read:"+ yd.val(this,"is_read") +
                          (this.is_read ? "(!!AnnouncementBubbling!!)" : "") +
                          "]";
                  };
@@ -319,6 +347,10 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
 
 //              yd.a.rt.control.feedClient.prototype.toString = _.partial(yd.realtimeClientToStringTemplate,"feedClient");
                 yd.a.rt.control.baseClient.prototype.toString = _.partial(yd.realtimeClientToStringTemplate,"baseClient");
+                yd.a.rt.control.networkClient.prototype.toString = _.partial(yd.realtimeClientToStringTemplate,"networkClient");
+                yd.a.process.modular.feedViewedMessagesProcessor.prototype.toString =_.partial(yd.feedPropToStringTemplate,"feedVwdMsgsPayldPrcsr",'_feed');
+                yd.a.process.modular.inboxUpdateProcessor.prototype.toString =_.partial(yd.feedPropToStringTemplate,"inboxUpdatePayldPrcsr",'_feed');
+                yd.a.process.modular.cursorUpdateProcessor.prototype.toString =_.partial(yd.feedPropToStringTemplate,"cursrUpdatePayldPrcsr",'_feed');
 
 
              }
@@ -364,13 +396,13 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                             obj,
                             funcName,
                             function(){
-                                console.group();
+                                console.group(funcName,objPath);
 
                                 var argsString = _.map(arguments,function(arg){return ("function"=== typeof(arg)) ? "function(){...}" : (arg||"{empty}").toString();}).join(", ");
                                 var stackTrace = Error().stack;
                                 window.yd.stacktrack = window.yd.stacktrack||{};
                                 window.yd.stacktrack[stackTrace]= (window.yd.stacktrack[stackTrace]||0)+1;
-                                console.error("CALLING:",
+                                console.trace("CALLING:",
                                               funcName,"(",argsString,") (proto=",objPath,")\n",
                                               "ON: ",(this||"{no 'this'}").toString(),
                                               "\nCall details: arguments=",arguments,"this=",this);
@@ -389,12 +421,21 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
 
     window.yd.logRealtimeMethods = function logRealtimeMethods () {
 
-        window.yd.wrapAndLog('yd.a.rt.factory',"openConnectionForFeed");
-        window.yd.wrapAndLog('yd.a.rt.connection.prototype',"connect");
-        window.yd.wrapAndLog('yd.a.rt.connection.prototype',"disconnect");
-        window.yd.wrapAndLog('yd.a.rt.connection.prototype',"_disconnectBayeux");
-        window.yd.wrapAndLog('yd.a.rt.resolver.prototype',"onConnect");
-        window.yd.wrapAndLog('yd.a.rt.resolver.prototype',"onData");
+        window.yd.wrapAndLog('yd.a.rt.modular.factory',"openConnectionForFeed");
+        window.yd.wrapAndLog('yd.a.rt.modular.connection.prototype',"connect");
+        window.yd.wrapAndLog('yd.a.rt.modular.connection.prototype',"_reconnect");
+        window.yd.wrapAndLog('yd.a.rt.modular.connection.prototype',"disconnect");
+        window.yd.wrapAndLog('yd.a.rt.modular.connection.prototype',"_disconnectBayeux");
+        window.yd.wrapAndLog('yd.a.rt.modular.connection.prototype',"_onRealtimeData");
+        window.yd.wrapAndLog('yd.a.rt.modular.messageResolver',"start");
+        window.yd.wrapAndLog('yd.a.rt.modular.messageResolver',"restart");
+        window.yd.wrapAndLog('yd.a.rt.modular.messageResolver',"onData");
+        window.yd.wrapAndLog('yd.a.rt.modular.messageResolver','_performBackfill');
+        window.yd.wrapAndLog('yd.a.rt.modular.fetchNewerResolver',"start");
+        window.yd.wrapAndLog('yd.a.rt.modular.fetchNewerResolver',"onData");
+        window.yd.wrapAndLog('yd.a.rt.modular.fetchNewerResolver','_fetchNewer');
+        window.yd.wrapAndLog('yd.a.rt.modular.fetchNewerResolver','_hydrateFeeds');
+        window.yd.wrapAndLog('yd.a.rt.modular.fetchNewerResolver','restart');
     };
 
 
@@ -403,13 +444,35 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
 // Control path flow of method calls expected.
 
 
-window.yd.wrapAndLog('yd.a.rt.control.feedClient.prototype','setNewestMessageId'); // in feedClient for control but later in update_processor for modular
-window.yd.wrapAndLog('yd.a.mdl.F.prototype','onData'); // Hook alias to onDataSingle
-window.yd.wrapAndLog('yd.a.mdl.F.prototype','onDataSingle'); //,'uses feedHydrator.hydrate in treatment');
-    window.yd.wrapAndLog('yd.a.process.both.modelRepository.prototype','transaction'); //,'uses feedHydrator._getProcessors in treatment');
-        window.yd.wrapAndLog('yd.a.mdl.F.prototype','process'); //,'uses cursorUpdateProcessor.process in treatment');
+//window.yd.wrapAndLog('yd.a.rt.control.baseClient.prototype','sendRequest'); // in feedClient for control but later in update_processor for modular
+//window.yd.wrapAndLog('yd.a.rt.control.baseClient.prototype','onRealtimeData'); //,'uses feedHydrator.hydrate in treatment');
+window.yd.wrapAndLog('yd.a.rt.control.baseClient.prototype','onRestData'); //,'uses feedHydrator.hydrate in treatment');
+window.yd.wrapAndLog('yd.a.rt.control.baseClient.prototype','onConnectionOpened'); //,'uses feedHydrator.hydrate in treatment');
+
+// REaltime network client is too noisy for general use
+//window.yd.wrapAndLog('yd.a.rt.control.networkClient.prototype','sendRequest'); // in feedClient for control but later in update_processor for modular
+//window.yd.wrapAndLog('yd.a.rt.control.networkClient.prototype','onRealtimeData'); //,'uses feedHydrator.hydrate in treatment');
+//window.yd.wrapAndLog('yd.a.rt.control.networkClient.prototype','onRestData'); //,'uses feedHydrator.hydrate in treatment');
+//window.yd.wrapAndLog('yd.a.rt.control.networkClient.prototype','onConnectionOpened'); //,'uses feedHydrator.hydrate in treatment');
+
+
+        window.yd.wrapAndLog('yd.a.process.both.modelRepository.prototype','transaction'); //,'uses feedHydrator._getProcessors in treatment');
+
+//        window.yd.wrapAndLog('yd.a.mdl.F.prototype','process'); //,'uses cursorUpdateProcessor.process in treatment');
+
+            window.yd.wrapAndLog('yd.a.process.modular.feedFetcher','fetch'); //,'goes before processors in control');
+            window.yd.wrapAndLog('yd.a.process.modular.feedFetcher','fetchNewer'); //,'goes before processors in control');
+            window.yd.wrapAndLog('yd.a.process.modular.feedFetcher','fetchOlder'); //,'goes before processors in control');
+            window.yd.wrapAndLog('yd.a.process.modular.feedFetcher','fetchThread'); //,'goes before processors in control');
+            window.yd.wrapAndLog('yd.a.process.modular.feedFetcher','postMessage'); //,'goes before processors in control');
+            window.yd.wrapAndLog('yd.a.process.modular.feedFetcher','_getMessages'); //,'goes before processors in control');
+            window.yd.wrapAndLog('yd.a.process.modular.feedHydrator','hydrate'); //,'goes before processors in control');
             window.yd.wrapAndLog('yd.a.mdl.F.prototype','setLocalLastSeenMessageId'); //,'goes before processors in control');
-            window.yd.wrapAndLog('yd.a.mdl.F.prototype','_getProcessors'); //,'uses feedHydrator._getProcessors in treatment');
+            window.yd.wrapAndLog('yd.a.mdl.F.prototype','setLastSeenMessageId'); //,'goes before processors in control');
+            window.yd.wrapAndLog('yd.a.process.modular.feedViewedMessagesProcessor.prototype','process'); //,'goes before processors in control');
+            window.yd.wrapAndLog('yd.a.process.modular.feedHydrator','_getProcessors'); //,'uses feedHydrator._getProcessors in treatment');
+                window.yd.wrapAndLog('yd.a.process.modular.inboxUpdateProcessor.prototype','process');
+                window.yd.wrapAndLog('yd.a.process.modular.cursorUpdateProcessor.prototype','process');
                 window.yd.wrapAndLog('yd.a.process.both.announcementBubblingProcessor.prototype','process');
                 window.yd.wrapAndLog('yd.a.process.both.messagePayloadProcessor.prototype','process');
             window.yd.wrapAndLog('yd.a.mdl.F.prototype','updateUnseenCounts'); //,'goes after processors in control');
@@ -425,8 +488,14 @@ window.yd.wrapAndLog('yd.a.mdl.F.prototype','setNewestMessageId'); // in feedCli
     };
              try
              {
-// CALL it right away
-window.yd.logProcessorSteps();
+// trigger log step wrapping right away for realtime and feed payload processing
+                 
+//                 console.groupCollapsed('(+)Calling window.yd.logProcessorSteps() to write console log entries for payload processing steps');
+//window.yd.logProcessorSteps();
+//                 console.groupEnd();
+//                 console.groupCollapsed('(+)Calling window.yd.logRealtimeMethods() to write console log entries for realtime connection operations');
+//window.yd.logRealtimeMethods();
+//                 console.groupEnd();
              }
                 catch(elog){ console.error("ERROR: Failure initializing log wrap diags",elog) }
 
