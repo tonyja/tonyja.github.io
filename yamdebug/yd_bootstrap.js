@@ -236,7 +236,7 @@ yd.a.mdl.F.prototype.toConsoleTable = function(verbose) {
 };
 
 yd.a.mdl.F.prototype.toString = function (verbose) {
-                    var retVal = "[feed:"+
+                    var retVal = "'[feed:"+
                         this.keyType + ":" + (this.keyId||"") +
                          " unv:" + this.getUnseenThreadCount() +
                          " newest:" + this.newest_message_id +
@@ -247,7 +247,7 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                       "]";
                     if (verbose) {
                         retVal += "\n" +
-                            (this.feedCounter && this.feedCounter._viewedStates.models.sort().reverse().join('\n'));
+                            (this.feedCounter && this.feedCounter._viewedStates.models.sort().reverse().join('\n')) + '\n\n';
                     }
     return retVal;
                 };
@@ -270,7 +270,7 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                      var obj = yd.val(yd.a.mdl,col) || yd.val(yd.a,col) ||  yd.val(yd,col) ||  yd.val(window,col) || [col,"Not Found"];
                      obj = obj.models ||  (obj.all ? obj.all() : obj);
                      var msg = _.map(obj, function(eo){ return eo.toString(verbose)}).join('\n');
-                     console.log(yd.logd(msg));
+                     console.log(yd.logd(msg + '\n'));
                  };
                  yd.logd = function(input) {
                      yd.diagsString += input + '\n';
@@ -280,7 +280,10 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                      var verbose = true;
                      console.group(yd.logd("(+) Viewed States and Feed Counts - " + Date() +" " + Date.now()));
 
-                       console.log(yd.logd('KEEP THIS ID client_load_id: ' + yd.a.request.getPageLoadId()));
+                       console.log(yd.logd('SAVE THESE IDS AND THIS DATA TO REPORT THE ISSUE:'));
+                       console.log(yd.logd('client_load_id: ' + yd.a.request.getPageLoadId()));
+                       console.log(yd.logd('user_id: ' + (yd.getCurrentUser()||{}).id));
+                       console.log(yd.logd('date: ' + Date()));
 
                        var cu = yd.getCurrentUser();
                        console.log(yd.logd('RGC tow_use_unviewed_ocular_counts: ' + cu.treatments.tow_use_unviewed_ocular_counts));
