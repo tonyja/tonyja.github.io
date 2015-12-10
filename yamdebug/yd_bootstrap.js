@@ -280,7 +280,7 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                      var verbose = true;
                      console.group(yd.logd("(+) Viewed States and Feed Counts - " + Date() +" " + Date.now()));
 
-                       console.log(yd.logd('SAVE THESE IDS AND THIS DATA TO REPORT THE ISSUE:'));
+                       console.log(yd.logd('SAVE THESE IDS AND THIS DATA TO A FILE AND REPORT THE ISSUE:'));
                        console.log(yd.logd('client_load_id: ' + yd.a.request.getPageLoadId()));
                        console.log(yd.logd('user_id: ' + (yd.getCurrentUser()||{}).id));
                        console.log(yd.logd('date: ' + Date()));
@@ -560,7 +560,7 @@ window.ensureDebugDiagArea = function() {
             '</br>' +
             '<a target="_blank" href="https://www.yammer.com/microsoft.com/#/threads/inGroup?type=in_group&feedId=6604622">Goto QA group</a> to post. ' +
             '<a target="_blank" href="https://www.yammer.com/microsoft.com/notes/2736887">More info on this tool</a>. ' +
-            '<button onclick="(function(){console.log(window.ensureDebugDiagArea());window.ensureDebugDiagArea().style.display=\'none\';return false;})()">Close window</button>';
+            '<button onclick="(function(){console.log(window.ensureDebugDiagArea());window.ensureDebugDiagArea().style.display=\'none\';return false;})()">Close</button>';
 
         document.body.appendChild(diagDiv);
     }
