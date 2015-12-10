@@ -322,7 +322,7 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                      if (!!popup) window.popupDiagnosticDiv(yd.diagsString);
                      yd.diagsString = '';
                  };
-                 yd.$('.yj-nav-menu')[0].ondblclick = function(){yd.dump(true)};
+                 //yd.$('.yj-nav-menu')[0].ondblclick = function(){yd.dump(true)};
 
                  yd.a.process.both.messagePayload.prototype.toString = function() {
                      return "[msgPayload" +
@@ -554,13 +554,13 @@ window.ensureDebugDiagArea = function() {
     if(!diagDiv) {
         diagDiv = document.createElement("div");
         diagDiv.id = "debug_diag_area";
-        diagDiv.style.cssText = "top: 115px; left: 310px; z-index: 5000; position: fixed; width: 500px; height: 500px; display: none; background-color: plum; padding: 10px;";
-        diagDiv.innerHTML = '<textarea id="diag_text" name="diag_text" style="width:95%; height: 85%; overflow: scroll;">Diagnostic text</textarea>' +
-            '</br>Copy and paste the text in this area and send the content (as a gist, file, or message text) in either a PM to Brian Davis or a post in our Seen/Unseen QA group.' +
+        diagDiv.style.cssText = "top: 115px; left: 310px; z-index: 5000; position: fixed; width: 500px; height: 400px; display: none; background-color: plum; padding: 10px;";
+        diagDiv.innerHTML = '<textarea id="diag_text" name="diag_text" style="width:95%; height: 80%; overflow: scroll;">Diagnostic text</textarea>' +
+            '</br>Copy and paste the text in this area and send the content (as a text file, document, or gist) in a post in our QA group.' +
             '</br>' +
-            '<a target="_blank" href="https://www.yammer.com/microsoft.com/groups/seenunseenqa">Goto Seen/Unseen QA group</a> to post. ' +
-            '<a target="_blank" href="https://www.yammer.com/microsoft.com/notes/1436937">More info on this tool</a>. ' +
-            '<button onclick="(function(){console.log(window.ensureDebugDiagArea());window.ensureDebugDiagArea().style.display=\'none\';return false;})()">Close diagnostics</button>';
+            '<a target="_blank" href="https://www.yammer.com/microsoft.com/#/threads/inGroup?type=in_group&feedId=6604622">Goto QA group</a> to post. ' +
+            '<a target="_blank" href="https://www.yammer.com/microsoft.com/notes/2736887">More info on this tool</a>. ' +
+            '<button onclick="(function(){console.log(window.ensureDebugDiagArea());window.ensureDebugDiagArea().style.display=\'none\';return false;})()">Close window</button>';
 
         document.body.appendChild(diagDiv);
     }
