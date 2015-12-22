@@ -122,7 +122,7 @@ function setYamConfigToDebug() {
                 console.log("Adding 'yd' object with global yam functions for debug",window.yd);
 
                 window.yd.$ = require('yam.$');
-                window.yd.Mustache = require('Mustache');
+                window.yd.Mustache = require('mustache');
 
                 window.yd.addAlias = function(pair) {
                     var foundVal = pair[0].indexOf('/') == -1 ?
@@ -287,7 +287,8 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
 
                        var cu = yd.getCurrentUser();
                        console.log(yd.logd('RGC tow_use_unviewed_ocular_counts: ' + cu.treatments.tow_use_unviewed_ocular_counts));
-                       console.log(yd.logd('ADUX tow_assured_delivery: ' + cu.treatments.tow_assured_delivery));
+                       console.log(yd.logd('RGC tow_use_unviewed_ocular_counts_v2: ' + cu.treatments.tow_use_unviewed_ocular_counts_v2));
+                       console.log(yd.logd('ADUX tow_assured_delivery_v2: ' + cu.treatments.tow_assured_delivery_v2));
                        console.log(yd.logd('Additional Logging tow_log_viewed_threads_fix: ' + cu.treatments.tow_log_viewed_threads_fix));
 
                        var errorsInSession = _.union(yd.a.report.exception._errorsToReport,
@@ -591,7 +592,7 @@ window.HookStacheLoad = (function(){BootstrapHook(unsafeWindow);HookStache_H='0b
 window.BootstrapHook = (function(unsafeWindow){
  unsafeWindow = unsafeWindow || wiindow.unsafeWindow || window;
  unsafeWindow.yam.mixin = _.extend;
- unsafeWindow.Mustache = require('Mustache');
+ unsafeWindow.Mustache = require('mustache');
  unsafeWindow.yam.ns = unsafeWindow.yd.ns;
  unsafeWindow.yam.$ = require('yam.$');
  unsafeWindow.templateKey = null;
