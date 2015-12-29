@@ -40,7 +40,7 @@ function setYamConfigToDebug() {
                             "core/lib/treatment": ".",
                             //"core/lib/namespace": ".",
                             'yam.model.Feed': "mdl.F",
-                            'models/lib/backbone/model/group': "mdl.G",
+                            'models/lib/backbone/collection/groups': "mdl.G",
                             'yam.model.Message': "mdl.M",
                             'yam.model.Network': "mdl.N",
                             'yam.model.Thread': "mdl.T",
@@ -52,6 +52,7 @@ function setYamConfigToDebug() {
                             'feeds/lib/ui/attachments/uploader': 'uploader',
 
                             'models/lib/model/helper/report_feed_events': 'report_feed_events',
+                            'models/lib/model/helper/top_groups': 'top_groups',
                             'feeds/lib/ui/threads/future/feed_delegate': 'ui.feedDelegate',
                             'models/lib/helper/realtime_connection_factory': 'rt.modular.factory',
                             'models/lib/client/realtime_feed_connection': 'rt.modular.connection',
