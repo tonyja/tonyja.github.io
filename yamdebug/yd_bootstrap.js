@@ -81,6 +81,15 @@ function setYamConfigToDebug() {
 'core/lib/report': 'report',
 
 
+                            'feeds/lib/ui/publisher/global/recipient_change_reporter': 'publisher.recipient_change_reporter',
+                            'feeds/lib/ui/publisher/global/recipient_selector': 'publisher.recipient_selector',
+                            'feeds/lib/ui/publisher/global/base_publisher': 'publisher.base_publisher',
+                            'feeds/lib/ui/publisher/global/thread_starter_publisher': 'publisher.thread_starter_publisher',
+           //                 'feeds/lib/ui/publisher/global/embed_publisher': 'publisher.embed_publisher',
+                            'feeds/lib/ui/threads/future/thread_list': 'ui.thread_list',
+                            'feeds/lib/ui/publisher/global/recipient_input': 'publisher.recipient_input',
+                            'common-ui/lib/ui/shared/type_ahead_component': 'ui.type_ahead_component',
+                                                                                                          
 'core/lib/uri_helper':'uriHelper'
                        },
 
@@ -443,6 +452,39 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
         window.yd.wrapAndLog('yd.a.rt.modular.fetchNewerResolver','restart');
     };
 
+    window.yd.logPublisherMethods = function logPublisherMethods () {
+/*
+                            'feeds/lib/ui/publisher/global/base_publisher': 'publisher.base_publisher',
+                            'feeds/lib/ui/publisher/global/recipient_selector': 'publisher.recipient_selector',
+                            'feeds/lib/ui/publisher/global/thread_starter_publisher': 'publisher.thread_starter_publisher',
+                            'feeds/lib/ui/publisher/global/embed_publisher': 'publisher.embed_publisher',
+                            'feeds/lib/ui/threads/future/feed_delegate': 'ui.thread_list',
+                            'feeds/lib/ui/publisher/global/recipient_input': 'publisher.recipient_input',
+                            'common-ui/lib/ui/shared/type_ahead_component': 'ui.type_ahead_component',
+                            */
+        window.yd.wrapAndLog('yd.a.publisher.recipient_change_reporter.prototype',"_onRecipientAdded");
+        window.yd.wrapAndLog('yd.a.publisher.recipient_change_reporter.prototype',"_onRecipientRemoved");
+        window.yd.wrapAndLog('yd.a.publisher.base_publisher.prototype',"_onSubmitMissingRequiredGroupHandler");
+        window.yd.wrapAndLog('yd.a.publisher.base_publisher.prototype',"_handleEmptyRecipientsList");
+        window.yd.wrapAndLog('yd.a.publisher.base_publisher.prototype',"_openAndFocusSelector");
+        window.yd.wrapAndLog('yd.a.publisher.base_publisher.prototype',"initialize");
+        window.yd.wrapAndLog('yd.a.publisher.thread_starter_publisher.prototype',"initialize");
+        window.yd.wrapAndLog('yd.a.publisher.thread_starter_publisher.prototype',"_addPublishers");
+        window.yd.wrapAndLog('yd.a.ui.thread_list.prototype',"addPublisher");
+        
+        window.yd.wrapAndLog('yd.a.publisher.recipient_input.prototype',"initialize");
+        window.yd.wrapAndLog('yd.a.publisher.recipient_input.prototype',"focus");
+        window.yd.wrapAndLog('yd.a.publisher.recipient_input.prototype',"_onEmptyRecipientList");
+        window.yd.wrapAndLog('yd.a.publisher.recipient_input.prototype',"_onKeydown");
+
+        window.yd.wrapAndLog('yd.a.ui.type_ahead_component.prototype',"registerField");
+        window.yd.wrapAndLog('yd.a.ui.type_ahead_component.prototype',"activate");
+        window.yd.wrapAndLog('yd.a.ui.type_ahead_component.prototype',"updateList");
+
+        window.yd.wrapAndLog('yd.a.ui.type_ahead_component.prototype',"deactivate");
+                window.yd.wrapAndLog('yd.a.ui.type_ahead_component.prototype',"unbindEvents");
+    };
+
 
     window.yd.logProcessorSteps =  function logProcessorSteps () {
 
@@ -500,6 +542,9 @@ window.yd.wrapAndLog('yd.a.mdl.F.prototype','setNewestMessageId'); // in feedCli
 //                 console.groupEnd();
 //                 console.groupCollapsed('(+)Calling window.yd.logRealtimeMethods() to write console log entries for realtime connection operations');
 //window.yd.logRealtimeMethods();
+//                 console.groupEnd();
+//                 console.groupCollapsed('(+)Calling window.yd.logPublisherMethods() to write console log entries for publisher operations');
+//window.yd.logPublisherMethods();
 //                 console.groupEnd();
              }
                 catch(elog){ console.error("ERROR: Failure initializing log wrap diags",elog) }
