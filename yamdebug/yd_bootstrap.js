@@ -300,7 +300,8 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                        console.log(yd.logd('RGC tow_use_unviewed_ocular_counts_v2: ' + cu.treatments.tow_use_unviewed_ocular_counts_v2));
                        console.log(yd.logd('ADUX tow_assured_delivery_v2: ' + cu.treatments.tow_assured_delivery_v2));
                        console.log(yd.logd('Additional Logging tow_log_viewed_threads_fix: ' + cu.treatments.tow_log_viewed_threads_fix));
-
+/*
+Errors were refactored so this no longer works
                        var errorsInSession = _.union(yd.a.report.exception._errorsToReport,
                                yd.a.report.exception._previouslyReported);
                        if (errorsInSession.length > 0) {
@@ -311,6 +312,7 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
 
                           console.group(yd.logd('(+) JS errors reported in this session'));
                             console.log(yd.logd(allErrorsString));
+*/
                           console.groupEnd();
                        }
 
