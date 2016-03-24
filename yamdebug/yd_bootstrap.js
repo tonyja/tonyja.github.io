@@ -131,7 +131,7 @@ function setYamConfigToDebug() {
 
                 console.log("Adding 'yd' object with global yam functions for debug",window.yd);
 
-                window.yd.$ = require('yam.$');
+                window.yd.$ = require('jquery');
                 window.yd.Mustache = require('mustache');
 
                 window.yd.addAlias = function(pair) {
