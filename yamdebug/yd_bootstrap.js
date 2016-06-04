@@ -40,7 +40,7 @@ function setYamConfigToDebug() {
                             "core/lib/treatment": ".",
                             //"core/lib/namespace": ".",
                             'yam.model.Feed': "mdl.F",
-                            'models/lib/backbone/collection/groups': "mdl.G",
+                            'collections/groups': "mdl.G",
                             'yam.model.Message': "mdl.M",
                             'yam.model.Network': "mdl.N",
                             'yam.model.Thread': "mdl.T",
@@ -48,7 +48,7 @@ function setYamConfigToDebug() {
                             'models/lib/helper/assured_delivery_experiments': 'assured_delivery_experiments',
                             'core/lib/yammer_api': 'api',
 
-                            'core/lib/pubsub': 'pubsub',
+//                            'core/lib/pubsub': 'pubsub',
                             'feeds/lib/ui/attachments/uploader': 'uploader',
 
                             'models/lib/model/helper/report_feed_events': 'report_feed_events',
@@ -63,8 +63,8 @@ function setYamConfigToDebug() {
                             'models/lib/client/base_realtime_client': 'rt.control.baseClient',
 
 'core/lib/data/repository': 'process.both.modelRepository',
-'models/lib/model/message_payload_processor': 'process.both.messagePayloadProcessor',
-'models/lib/model/announcement_bubbling_processor': 'process.both.announcementBubblingProcessor',
+'models/message_payload_processor': 'process.both.messagePayloadProcessor',
+'models/announcement_bubbling_processor': 'process.both.announcementBubblingProcessor',
 'models/lib/helper/inbox_update_processor': 'process.modular.inboxUpdateProcessor',
 'models/lib/helper/cursor_update_processor': 'process.modular.cursorUpdateProcessor',
                             'models/lib/model/helper/feed_viewed_messages_processor': 'process.modular.feedViewedMessagesProcessor',
@@ -72,11 +72,11 @@ function setYamConfigToDebug() {
 'models/lib/helper/feed_fetcher': 'process.modular.feedFetcher',
                             "core/lib/client/message_payload": 'process.both.messagePayload',
 
-'models/lib/backbone/collection/global_viewed_states': 'gvs',
+'collections/global_viewed_states': 'gvs',
 'models/lib/helper/feed_factory': 'feed_factory',
 'models/lib/helper/viewed_state_helper': 'viewed_state_helper',
-'models/lib/backbone/model/viewed_state': 'viewed_state',
-'models/lib/backbone/viewed_state_collection': 'viewed_state_collection',
+'models/viewed_state': 'viewed_state',
+'collections/viewed_states': 'viewed_state_collection',
 'core/lib/yammer_request': 'request',
 'core/lib/report': 'report',
 
