@@ -106,7 +106,13 @@ function setYamConfigToDebug() {
              try
              {
 
-yd.a.viewed_state_prototype = yd.a.mdl.F.all()[0].feedCounter._viewedStates.models[0].__proto__;
+yd.a.viewed_state_prototype = 
+  // First feed model (inbox feeds and initial route feed should all be loaded by now)
+  yd.a.mdl.F.all()[0]
+    // Feed Count ViewedStates backbone collection
+    .feedCounter._viewedStates.__proto__
+    // prototype of ViewedState model for that collection
+    .model.prototype;
 
 yd.a.viewed_state_prototype.isViewed = function () {
       var lastViewedId = this.get('lastViewedMessageId');
