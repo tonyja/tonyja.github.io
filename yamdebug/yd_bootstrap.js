@@ -1,5 +1,5 @@
 // ==UserScript== for Tampermonkey
-// @name       HookStache
+// @name       FeedsDumpYammerDebugTool
 // @namespace  http://www.yammer.com/
 // @version    0.1
 // @description  YamJS debugging info (requests, realtime clients, client ORM models) with configurable data driven  Mustache templates.
@@ -127,12 +127,12 @@ yd.a.viewed_state_prototype.toString = function() {
    var eo = this.asConsoleTableProps();
 
 return String.format(
-  '{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8}:{9}:{10}:{11}:{12}',
+  '{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8}:{9}:{10}:{11}',
   eo.lastReplyMessageId,
   eo.lastViewedMessageId,
   eo.id,
   eo.threadState,
-  eo.isRendered,
+//  eo.isRendered,
   eo.loadType,
   eo.loadFeed,
   eo.fetchType,
@@ -231,7 +231,7 @@ yd.a.mdl.F.prototype.toConsoleTable = function() {
 };
 
 yd.a.mdl.F.prototype.toString = function (verbose) {
-                    var retVal = "'[feed:"+
+                    var retVal = "[feed:"+
                         this.keyType + ":" + (this.keyId||"") +
                          " unv:" + this.getUnseenThreadCount() +
                          " newest:" + this.newest_message_id +
@@ -248,13 +248,15 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                 };
 
                  yd.diagsString = '';
-                 yd.p = function(col, verbose, showEmptyFeeds) {
+                 yd.p = function(col, verbose) {
                      var obj = yd.val(yd.a.mdl,col) || yd.val(yd.a,col) ||  yd.val(yd,col) ||  yd.val(window,col) || [col,"Not Found"];
                      obj = obj.models ||  (obj.all ? obj.all() : []);
-                     if (!showEmptyFeeds) {
-                       obj = obj.filter(function(ef){ return yd.val(ef,'feedCounter._viewedStates.models.0'); });
-                     }
-                     var msg = obj.map(function(eo){ return eo.toString(verbose)}).join('\n');
+                     var modelsWithPayloads = obj.filter(function(ef){ return !!yd.val(ef,'_hasFirstPayload'); });
+                     var msg = modelsWithPayloads.map(function(eo){ return eo.toString(verbose)}).join('\n');
+                     var modelsNoPayloads = obj.filter(function(ef){ return !yd.val(ef,'_hasFirstPayload'); });
+                       msg += "\n\n=== Models that haven't loaded any payloads yet ===\n";
+                       msg += modelsNoPayloads.map(function(eo){ return eo.toString(false)}).join('\n'); // verbose=false don't show viewed state thread info
+      
                      console.log(yd.logd(msg + '\n'));
                  };
                  yd.logd = function(input) {
@@ -288,6 +290,18 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
 
                      if (!!popup) window.popupDiagnosticDiv(yd.diagsString);
                      yd.diagsString = '';
+                 };
+
+                 yd.getCurrentUser = function () {
+                    // The only User model loaded with web_preferences should be the current one
+                    return yd.a.mdl.U.all().filter(function(eo) {
+                      return eo.web_preferences })[0];
+                 };
+
+                 yd.getCurrentNetwork = function () {
+                    // The only Network model loaded with group_counts should be the current one
+                    return yd.a.mdl.N.all().filter(function(eo) {
+                      return eo.group_counts })[0];
                  };
 
              }
