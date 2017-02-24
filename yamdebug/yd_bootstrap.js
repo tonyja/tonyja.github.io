@@ -126,21 +126,22 @@ yd.a.viewed_state_prototype.toString = function() {
 
    var eo = this.asConsoleTableProps();
 
-return String.format(
-  '{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8}:{9}:{10}:{11}',
-  eo.lastReplyMessageId,
-  eo.lastViewedMessageId,
-  eo.id,
+return [
+'rp:' + eo.lastReplyMessageId,
+  'vw:' +eo.lastViewedMessageId,
+  'id:' +eo.id,
   eo.threadState,
 //  eo.isRendered,
+'load?',
   eo.loadType,
   eo.loadFeed,
+'unvwd?',
   eo.fetchType,
   eo.fetchFeed,
   eo.dataOrigin,
   eo.reconcileInfo,
   eo.keepHigher,
-  eo.keepHigherOrigin);
+  eo.keepHigherOrigin].join(':');
 
 /*
   //var eo = this;
@@ -266,7 +267,6 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                  yd.dump = function(popup) {
                      var verbose = true;
                      console.group(yd.logd("(+) Viewed States and Feed Counts - " + Date() +" " + Date.now()));
-
 //                       console.log(yd.logd('SAVE THESE IDS AND THIS DATA TO A FILE AND REPORT THE ISSUE:'));
 //                       console.log(yd.logd('client_load_id: ' + yd.a.request.getPageLoadId()));
 //                       console.log(yd.logd('user_id: ' + (yd.getCurrentUser()||{}).id));
