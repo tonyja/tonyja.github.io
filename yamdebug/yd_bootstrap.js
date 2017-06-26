@@ -106,13 +106,15 @@ function setYamConfigToDebug() {
              try
              {
 
+yd.initViewedStateToStringFromAnyLoadedThread = function() {
+
 yd.a.viewed_state_prototype = 
-  // First feed model (inbox feeds and initial route feed should all be loaded by now)
-  yd.a.mdl.F.all()[0]
-    // Feed Count ViewedStates backbone collection
-    .feedCounter._viewedStates.__proto__
-    // prototype of ViewedState model for that collection
-    .model.prototype;
+  // Getall feed models (inbox feeds and initial route feed should all be loaded by now)
+  yd.a.mdl.F.all()
+    // Find the first feed model with any thread objects in it
+    .filter(ef => ef.getThreads().length)[0]
+    // Find the first thread and get the ViewedState object prototype
+    .getThreads()[0].viewedState.__proto__;
 
 yd.a.viewed_state_prototype.isViewed = function () {
       var lastViewedId = this.get('lastViewedMessageId');
@@ -223,6 +225,8 @@ yd.a.viewed_state_prototype.toConsoleTable = function() {
   console.groupEnd();
 };
 
+};
+
 yd.a.mdl.F.prototype.toConsoleTable = function() {
   console.group(this.toString());
   var viewedStatesArray = this.feedCounter._viewedStates.models.sort().reverse();
@@ -242,8 +246,17 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                          " hasPayld?:" + this._hasFirstPayload +
                       "]";
                     if (verbose) {
+                        var modelsCol = (this.feedCounter && this.feedCounter._viewedStates && this.feedCounter._viewedStates.models);
+                        // For this to work we need a conditional breakpoint on the first line of the
+                        //  yamjs/models/helpers/viewed_state.js funcntion for viewedStatesFor(feedCounter) to
+                        //  store the private closure localViewedStates map in window.localViewedStates
+                        // Sample conditional breakpoint to add (if x is the minimized var name for localViewedStates map):
+                        // !window.localViewedStates && console.error('Saving window.localviewedStates',window.localViewedStates = x)
+                        modelsCol = modelsCol || (unsafeWindow.localViewedStates && unsafeWindow.localViewedStates[this.feedCounter.id] && unsafeWindow.localViewedStates[this.feedCounter.id].models);
+                        modelsCol = modelsCol || ['Cannot load private this.feedCounter._viewedStates or conditional breakpoint populated value in window.localViewedStates'];
+
                         retVal += "\n" +
-                            (this.feedCounter && this.feedCounter._viewedStates.models.sort().reverse().join('\n')) + '\n\n';
+                            (modelsCol.sort().reverse().join('\n')) + '\n\n';
                     }
     return retVal;
                 };
@@ -303,6 +316,8 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                     return yd.a.mdl.N.all().filter(function(eo) {
                       return eo.group_counts })[0];
                  };
+
+yd.initViewedStateToStringFromAnyLoadedThread(); // Will throw an error if no threads are loaded yet
 
              }
              catch(tse)
