@@ -281,11 +281,13 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                      var verbose = true;
                      var clientLoadId = yd.val(window.yamjsReportedLogs,'INFO.0.Parameters.client_load_id');
                      var userId = yd.val(window.yamjsReportedLogs,'INFO.0.UserId');
+                     var locationUrl = yd.val(window,'location.href');
                      console.group(yd.logd("(+) Viewed States and Feed Counts - " + Date() +" " + Date.now()));
                        console.log(yd.logd('SAVE THESE IDS AND THIS DATA TO A FILE AND REPORT THE ISSUE:'));
                        console.log(yd.logd('client_load_id: ' + clientLoadId));
                        console.log(yd.logd('user_id: ' + userId));
                        console.log(yd.logd('date: ' + Date()));
+                       console.log(yd.logd('url: ' + locationUrl));
 
                        console.group(yd.logd("(+) Feed Counts and Viewed States"));
 
