@@ -279,10 +279,12 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                  };
                  yd.dump = function(popup) {
                      var verbose = true;
+                     var clientLoadId = yd.val(window.yamjsReportedLogs,'INFO.0.Parameters.client_load_id');
+                     var userId = yd.val(window.yamjsReportedLogs,'INFO.0.UserId');
                      console.group(yd.logd("(+) Viewed States and Feed Counts - " + Date() +" " + Date.now()));
-//                       console.log(yd.logd('SAVE THESE IDS AND THIS DATA TO A FILE AND REPORT THE ISSUE:'));
-//                       console.log(yd.logd('client_load_id: ' + yd.a.request.getPageLoadId()));
-//                       console.log(yd.logd('user_id: ' + (yd.getCurrentUser()||{}).id));
+                       console.log(yd.logd('SAVE THESE IDS AND THIS DATA TO A FILE AND REPORT THE ISSUE:'));
+                       console.log(yd.logd('client_load_id: ' + clientLoadId));
+                       console.log(yd.logd('user_id: ' + userId));
                        console.log(yd.logd('date: ' + Date()));
 
                        console.group(yd.logd("(+) Feed Counts and Viewed States"));
@@ -300,6 +302,8 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                      console.groupEnd();
 
                      console.log(yd.logd("DONE Viewed States and Feed Counts - " + Date() +" " + Date.now()));
+
+                     console.log(yd.logd("ALL ERRORS AND LOGS FROM YAMJS - " + JSON.stringify(window.yamjsReportedLogs, null , '  ')));
 
                      if (!!popup) window.popupDiagnosticDiv(yd.diagsString);
                      yd.diagsString = '';
