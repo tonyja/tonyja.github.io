@@ -21,11 +21,12 @@ var getNotebookEmbedHtml = function () {
   method="post">
 
   <div id="OneNoteInputsVisibility" style="display: block;">
-    <br>(copy these from view srouce inspect on <a target="_blank" href="https://microsoft.sharepoint-df.com/:o:/r/teams/hackdayyammeronenote/_layouts/15/WopiFrame.aspx?sourcedoc=%7B0a026751-4250-47a2-b365-08c43ab8598d%7D&action=editnew">WOPIFrame.aspx for a sample OneNote</a>
-    <br>and they should work for ten hours on any one note you have access to)
-    <br>access_token = <input name="access_token" value="paste_access_token" type="text">
-    <br>user_id = <input name="user_id" value="10033fff8006c8ce" type="text">
-    <br>(leve these alone)
+    <br>Copy access_token and user_id values from here <a target="_blank" href="https://microsoft.sharepoint-df.com/:o:/r/teams/hackdayyammeronenote/_layouts/15/WopiFrame.aspx?sourcedoc=%7B0a026751-4250-47a2-b365-08c43ab8598d%7D&action=editnew">WOPIFrame.aspx for a sample OneNote</a>
+    <br> - After you visit that link open the dev tools (Command+Option+I in Chrome) and find the body.form inputs to copy
+    <br> - The values should work for ten hours on any one note you have access to
+    <br>paste in access_token = <input name="access_token" value="paste_access_token" type="text">
+    <br>paste in user_id = <input name="user_id" value="10033fff8006c8ce" type="text">
+    <br>(leave these alone)
     <br>access_token_ttl = <input name="access_token_ttl" value="${ttl}" type="text">
     <br>wdCorrelationId = <input name="wdCorrelationId" value="{71C2559E-F00E-0000-7474-BBBDB8D59151}" type="text">
     <br><input name="LoadButton" value="Load OneNote" type="submit" onsubmit=beforeFormSubmit onload=noteFormLoaded >
