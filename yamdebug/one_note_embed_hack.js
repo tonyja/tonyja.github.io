@@ -20,7 +20,7 @@ var getNotebookEmbedHtml = function () {
   id="OneNoteInputsForm"
   method="post">
 
-  <div id="OneNoteInputsVisibility" style="display: none;">
+  <div id="OneNoteInputsVisibility" style="display: block;">
     <br>(copy these from WopiFrame.aspx)
     <br>access_token = <input name="access_token" value="paste_access_token" type="text">
     <br>user_id = <input name="user_id" value="10033fff8006c8ce" type="text">
