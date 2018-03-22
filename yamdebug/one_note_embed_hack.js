@@ -21,7 +21,8 @@ var getNotebookEmbedHtml = function () {
   method="post">
 
   <div id="OneNoteInputsVisibility" style="display: block;">
-    <br>(copy these from WopiFrame.aspx)
+    <br>(copy these from view srouce inspect on <a target="_blank" href="https://microsoft.sharepoint-df.com/:o:/r/teams/hackdayyammeronenote/_layouts/15/WopiFrame.aspx?sourcedoc=%7B0a026751-4250-47a2-b365-08c43ab8598d%7D&action=editnew">WOPIFrame.aspx for a sample OneNote</a>
+    <br>and they should work for ten hours on any one note you have access to)
     <br>access_token = <input name="access_token" value="paste_access_token" type="text">
     <br>user_id = <input name="user_id" value="10033fff8006c8ce" type="text">
     <br>(leve these alone)
@@ -117,3 +118,4 @@ document.body.ondblclick = () => {
         eo.style.display = 'block';
     });
 };
+onhashchanged_handler();
