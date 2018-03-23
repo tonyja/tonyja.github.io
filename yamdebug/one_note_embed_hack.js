@@ -101,7 +101,7 @@ var loadFormFromLocalStorage = () => {
       fm.action = storeVal;
     }
   }
-  setCorrectToken(fm);
+  setCorrectToken(fm, localStorage.getItem(storeItemName + '_access_token'));
   fm.submit();
 };
 
@@ -118,13 +118,16 @@ var setLocalStorageFromForm = () => {
     storeItemName = localStorePrefix + groupId;
     if (groupId) {
       localStorage.setItem(storeItemName, fm.action);
+      localStorage.setItem(storeItemName + '_access_token', fm.elements['access_token'].value)
     }
   }
   setCorrectToken(fm);
 };
 
-var setCorrectToken = (fm) => {
-  if (isDogfoodNoteUrl(fm.action)) {
+var setCorrectToken = (fm, access_token_override) => {
+  if (access_token_override) {
+    fm.elements['access_token'].value = access_token_override;
+  } else if (isDogfoodNoteUrl(fm.action)) {
     // use dogfood access token for dogfood notes
     fm.elements['access_token'].value = fm.elements['access_token_df'].value;
   } else {
