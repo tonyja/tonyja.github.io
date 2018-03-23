@@ -118,10 +118,10 @@ var setLocalStorageFromForm = () => {
     storeItemName = localStorePrefix + groupId;
     if (groupId) {
       localStorage.setItem(storeItemName, fm.action);
-      localStorage.setItem(storeItemName + '_access_token', fm.elements['access_token'].value)
     }
+    setCorrectToken(fm);
+    localStorage.setItem(storeItemName + '_access_token', fm.elements['access_token'].value);
   }
-  setCorrectToken(fm);
 };
 
 var setCorrectToken = (fm, access_token_override) => {
