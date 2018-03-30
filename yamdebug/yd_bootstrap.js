@@ -19,7 +19,7 @@ var debugTimeout = null;
 var HookStache_SCRIPT = HookStache_SCRIPT || window.HookStache_SCRIPT;
 var HookStache_H = HookStache_H || window.HookStache_H;
 //var unsafeWindow = unsafeWindow || window;
-function setYamConfigToDebug() {  
+function setYamConfigToDebug() {
     console.log("Calling setYamConfigToDebug to set up debug environment.");
     clearTimeout(debugTimeout);
     if("undefined" != typeof(yam) && !!yam.ready)
@@ -108,13 +108,24 @@ function setYamConfigToDebug() {
 
 yd.initViewedStateToStringFromAnyLoadedThread = function() {
 
-yd.a.viewed_state_prototype = 
+var sampleThread = yam.model.Thread.all()[0];
+
+if (!sampleThread) {
+  console.warn('No sample thread loaded yet to get viewed state proto.  Try again in 1 seecond');
+  return setTimeout(yd.initViewedStateToStringFromAnyLoadedThread,1000);
+}
+
+yd.a.mdl.F.all()[0]
+  // Find the first feed and add to the proto
+  .__proto__.getThreads = function() {
+    return yam.model.Delivery.all()
+      .filter(eo => eo.receiver_type == 'feed' && eo.receiver_id == this.id)
+      .map(eo => yam.model.Thread.findById(eo.type_id))
+  };
+
+yd.a.viewed_state_prototype =
   // Getall feed models (inbox feeds and initial route feed should all be loaded by now)
-  yd.a.mdl.F.all()
-    // Find the first feed model with any thread objects in it
-    .filter(ef => ef.getThreads().length)[0]
-    // Find the first thread and get the ViewedState object prototype
-    .getThreads()[0].viewedState.__proto__;
+  sampleThread.viewedState.__proto__;
 
 yd.a.viewed_state_prototype.isViewed = function () {
       var lastViewedId = this.get('lastViewedMessageId');
@@ -124,6 +135,140 @@ yd.a.viewed_state_prototype.isViewed = function () {
 
       return !allDataIsLoaded || hasViewedMostRecentReply;
     };
+
+
+yd.a.mdl.F.all()[0]
+  // Find the first feed and add to the proto
+  .__proto__.getUnseenThreadCount = function() {
+    return this.getThreads().length;
+  };
+
+
+var formatUrl = function(url) {
+   var suffix = 'threaded=extended&exclude_own_messages_from_unseen=true';
+   var firstChar = url.indexOf('?') > 0 ? '&' : '?';
+   return 'https://www.yammer.com/api/v1/' + url + firstChar + suffix;
+}
+
+yd.a.mdl.F.all()[0]
+  // Find the first feed and add to the proto
+  .__proto__.getUrl = function () {
+  var type = this.keyType;
+  var id = this.keyId;
+  const useUnviewedTreatment = '&use_unviewed=true';
+  switch (type) {
+    case 'algo':
+      return formatUrl(
+        'messages/true_discovery.json?keep_seen_threads=true&prevent_empty_feed=true',
+      );
+    case 'bookmarks':
+      return formatUrl('messages/bookmarked_by/' + id + '.json');
+    case 'uploaded_file':
+    case 'file':
+      return formatUrl('messages/about_file/' + id + '.json');
+    case 'following':
+      return formatUrl('messages/following.json?limit=8');
+    case 'following_exp':
+      return formatUrl('messages/following.json?limit=20');
+    case 'following_v2':
+      return formatUrl('messages/following_v2.json?limit=20');
+    case 'general':
+      return formatUrl('messages/general.json?include_counts=true&limit=8' + useUnviewedTreatment);
+    case 'generalUnviewed':
+      return formatUrl('messages/general.json?include_counts=true&limit=8&filter=unviewed' + useUnviewedTreatment);
+    case 'group':
+      return formatUrl('messages/in_group/' + id + '.json?include_counts=true&limit=8' + useUnviewedTreatment);
+    case 'groupUnviewed':
+      return formatUrl('messages/in_group/' + id + '.json?include_counts=true&limit=8&filter=unviewed' + useUnviewedTreatment);
+    case 'inboxChat':
+      // We need to set the count to 10 (fixes SUPENG-8113) so that server
+      // returns 10 latest chat threads and we can use them to
+      // mark chats READ/UNREAD on page load. 10 seems an arbitray number, its a
+      // number high enough that it would fulfill the purpose practically.
+      // People usually don't have more than 10 chats open at a time.
+      // Accompanying yammer thread for this conversation
+      // https://www.yammer.com/microsoft.com/#/Threads/show?threadId=709124482
+      return formatUrl('messages/inbox.json?all_unseen=true&filter=PRIVATE%3Bchat&limit=10');
+    case 'inboxUnread':
+      return formatUrl('messages/inbox.json?all_unseen=true&filter=unarchived%3Binbox_unseen');
+    case 'inboxAll':
+      return formatUrl('messages/inbox.json?all_unseen=true&filter=unarchived');
+    case 'myAll':
+      return formatUrl('messages/my_all.json?limit=8');
+    case 'myFeed':
+      return formatUrl('messages/my_feed.json');
+    case 'originalAlgo':
+      return formatUrl('messages/original_algo.json');
+    case 'open_graph_object':
+    case 'openGraphObject':
+      return formatUrl('messages/open_graph_objects/' + id + '.json');
+    case 'page':
+      return formatUrl('messages/about_page/' + id + '.json');
+    case 'search':
+      return undefined;
+    case 'sharing':
+      return formatUrl('messages/sharing/' + id + '.json');
+    case 'thread': {
+      return formatUrl('messages/in_thread/' + id + '.json');
+    }
+    case 'topic':
+      return formatUrl('messages/about_topic/' + id + '.json');
+    case 'topicAnnouncements':
+      return formatUrl(
+        'messages/about_topic/' + id +
+        '/attachments/' + getAppId('announcements') + '.json?filter=announcement',
+      );
+    case 'topicLinks':
+      return formatUrl(
+        'messages/about_topic/' + id +
+        '/attachments/' + getAppId('links') + '.json?filter=link',
+      );
+    case 'topicPolls':
+      return formatUrl(
+        'messages/about_topic/' + id +
+        '/attachments/' + getAppId('polls') + '.json?filter=poll',
+      );
+    case 'user':
+      return formatUrl('messages/from_user/' + id + '.json?limit=8');
+    case 'userAnnouncements':
+      return formatUrl(
+        'messages/from_user/' + id +
+        '/attachments/' + getAppId('announcements') + '.json?filter=announcement',
+      );
+    case 'userLinks':
+      return formatUrl(
+        'messages/from_user/' + id +
+        '/attachments/' + getAppId('links') + '.json?filter=link',
+      );
+    case 'userPolls':
+      return formatUrl(
+        'messages/from_user/' + id +
+        '/attachments/' + getAppId('polls') + '.json?filter=poll',
+      );
+    case 'userPraise':
+      return formatUrl(
+        'messages/received_by/' + id +
+        '/attachments/' + getAppId('praise') + '.json?filter=praise',
+      );
+    default:
+      throw 'Unknown feed type';
+  }
+}
+
+yd.a.mdl.F.all()[0]
+  // Find the first feed and add to the proto
+  .__proto__.getCommonId = function () {
+  if (this.keyType.indexOf('inbox') >= 0) {
+        return 'inbox';
+    } else if (this.keyType.indexOf('group') >= 0) {
+        return 'group' + this.keyId;
+    } else if (this.keyType.indexOf('general') >= 0) {
+        return 'general';
+    } else {
+        return this.getUrl();
+    }
+}
+
 yd.a.viewed_state_prototype.toString = function() {
 
    var eo = this.asConsoleTableProps();
@@ -168,7 +313,7 @@ OLDEST version
         retVal += "\nPreviousValues:" + JSON.stringify(previousValues);
     }
     return retVal;
-*/    
+*/
 
 };
 
@@ -235,28 +380,41 @@ yd.a.mdl.F.prototype.toConsoleTable = function() {
   console.groupEnd();
 };
 
+yd.a.mdl.F.prototype.getViewedStates = function () {
+      var modelsCol = (this.feedCounter && this.feedCounter._viewedStates && this.feedCounter._viewedStates.models);
+      // For this to work we need a conditional breakpoint on the first line of the
+      //  yamjs/models/helpers/viewed_state.js funcntion for viewedStatesFor(feedCounter) to
+      //  store the private closure localViewedStates map in window.localViewedStates
+      // Sample conditional breakpoint to add (if x is the minimized var name for localViewedStates map):
+      // !window.localViewedStates && console.error('Saving window.localviewedStates',window.localViewedStates = x)
+      modelsCol = modelsCol || (unsafeWindow.localViewedStates && this.getCommonId && unsafeWindow.localViewedStates[this.getCommonId()] && unsafeWindow.localViewedStates[this.getCommonId()].models);
+      modelsCol = modelsCol || this.getThreads().map(eo => eo.viewedState);
+
+
+      return modelsCol;
+}
+
 yd.a.mdl.F.prototype.toString = function (verbose) {
                     var retVal = "[feed:"+
                         this.keyType + ":" + (this.keyId||"") +
-                         " unv:" + this.getUnseenThreadCount() +
+                         " threads:" + this.getUnseenThreadCount() +
+                         " allVws:" + this.getViewedStates().length +
+                         " unVWs:" + this.getViewedStates().filter(eo => eo.isViewed && !eo.isViewed()).length +
                          " newest:" + this.newest_message_id +
-                         " oldest:"+ this._oldest_threaded_id +
-                        " hasOlder:"+this._olderAvailable +
+                         " oldest:"+ this.oldest_threaded_id +
+                        " hasOlder:"+this.older_available +
                       //  " realtime:"+(this._realtimeConnection && this.isRealtimeConnected()) +
-                         " hasPayld?:" + this._hasFirstPayload +
+                         " hasPayld?:" + this.has_first_payload +
                       "]";
                     if (verbose) {
-                        var modelsCol = (this.feedCounter && this.feedCounter._viewedStates && this.feedCounter._viewedStates.models);
-                        // For this to work we need a conditional breakpoint on the first line of the
-                        //  yamjs/models/helpers/viewed_state.js funcntion for viewedStatesFor(feedCounter) to
-                        //  store the private closure localViewedStates map in window.localViewedStates
-                        // Sample conditional breakpoint to add (if x is the minimized var name for localViewedStates map):
-                        // !window.localViewedStates && console.error('Saving window.localviewedStates',window.localViewedStates = x)
-                        modelsCol = modelsCol || (unsafeWindow.localViewedStates && unsafeWindow.localViewedStates[this.feedCounter.id] && unsafeWindow.localViewedStates[this.feedCounter.id].models);
-                        modelsCol = modelsCol || ['Cannot load private this.feedCounter._viewedStates or conditional breakpoint populated value in window.localViewedStates'];
+                        var modelsCol1 = this.getThreads().map(eo => eo.viewedState);
 
-                        retVal += "\n" +
-                            (modelsCol.sort().reverse().join('\n')) + '\n\n';
+                        var modelsCol2 = unsafeWindow.localViewedStates ? this.getViewedStates() : [];
+
+                        retVal += "\nVIA this.getThreads()\n" +
+                            (modelsCol1.sort().reverse().join('\n'));
+                        retVal += "\nVIA this.getViewedStates() (requires a window.localViewedStates breakpoint to get data)\n" +
+                            (modelsCol2.sort().reverse().join('\n')) + '\n\n';
                     }
     return retVal;
                 };
@@ -265,12 +423,12 @@ yd.a.mdl.F.prototype.toString = function (verbose) {
                  yd.p = function(col, verbose) {
                      var obj = yd.val(yd.a.mdl,col) || yd.val(yd.a,col) ||  yd.val(yd,col) ||  yd.val(window,col) || [col,"Not Found"];
                      obj = obj.models ||  (obj.all ? obj.all() : []);
-                     var modelsWithPayloads = obj.filter(function(ef){ return !!yd.val(ef,'_hasFirstPayload'); });
+                     var modelsWithPayloads = obj.filter(function(ef){ return !!yd.val(ef,'has_first_payload'); });
                      var msg = modelsWithPayloads.map(function(eo){ return eo.toString(verbose)}).join('\n');
-                     var modelsNoPayloads = obj.filter(function(ef){ return !yd.val(ef,'_hasFirstPayload'); });
+                     var modelsNoPayloads = obj.filter(function(ef){ return !yd.val(ef,'has_first_payload'); });
                        msg += "\n\n=== Models that haven't loaded any payloads yet ===\n";
                        msg += modelsNoPayloads.map(function(eo){ return eo.toString(false)}).join('\n'); // verbose=false don't show viewed state thread info
-      
+
                      console.log(yd.logd(msg + '\n'));
                  };
                  yd.logd = function(input) {
@@ -429,7 +587,7 @@ yd.initViewedStateToStringFromAnyLoadedThread(); // Will throw an error if no th
         window.yd.wrapAndLog('yd.a.publisher.thread_starter_publisher.prototype',"initialize");
         window.yd.wrapAndLog('yd.a.publisher.thread_starter_publisher.prototype',"_addPublishers");
         window.yd.wrapAndLog('yd.a.ui.thread_list.prototype',"addPublisher");
-        
+
         window.yd.wrapAndLog('yd.a.publisher.recipient_input.prototype',"initialize");
         window.yd.wrapAndLog('yd.a.publisher.recipient_input.prototype',"focus");
         window.yd.wrapAndLog('yd.a.publisher.recipient_input.prototype',"_onEmptyRecipientList");
@@ -494,7 +652,7 @@ window.yd.wrapAndLog('yd.a.mdl.F.prototype','setNewestMessageId'); // in feedCli
              try
              {
 // trigger log step wrapping right away for realtime and feed payload processing
-                 
+
 //                 console.groupCollapsed('(+)Calling window.yd.logProcessorSteps() to write console log entries for payload processing steps');
 //window.yd.logProcessorSteps();
 //                 console.groupEnd();
@@ -558,7 +716,7 @@ window.ensureDebugDiagArea = function() {
             '<a target="_blank" href="https://www.yammer.com/microsoft.com/notes/2736887">More info on this tool</a>. ' +
             '<button onclick="(function(){console.log(window.ensureDebugDiagArea());window.ensureDebugDiagArea().style.display=\'none\';return false;})()">Close</button>';
 
-        document.body.appendChild(diagDiv);   
+        document.body.appendChild(diagDiv);
     }
 
     return diagDiv;
